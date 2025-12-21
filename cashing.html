@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Architecture - Caching Quiz</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--background);
+            padding-bottom: 1rem;
+        }
+
+        h1 { margin: 0; color: var(--primary); }
+        .meta { color: var(--secondary); font-size: 0.9rem; }
+
+        .question-block {
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 10px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .topic-badge {
+            background: #dbeafe;
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f1f5f9;
+        }
+
+        .option-label input {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .numerical-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .footer-actions {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            border: none;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        
+        .btn:hover { opacity: 0.9; }
+
+        .copy-btn {
+            background: #f1f5f9;
+            color: var(--secondary);
+            border: 1px solid #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #e2e8f0;
+            color: var(--text);
+        }
+
+        /* Results Styles */
+        .result-view { display: none; }
+        
+        .score-board {
+            text-align: center;
+            padding: 2rem;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .score-val {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .feedback.correct { background: #dcfce7; color: #166534; border-left: 4px solid var(--success); }
+        .feedback.incorrect { background: #fee2e2; color: #991b1b; border-left: 4px solid var(--danger); }
+
+        .correct-answer-text {
+            font-weight: bold;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .hidden { display: none; }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 12px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Cache Memory Master</h1>
+        <p class="meta">10 Random Questions | Computer Architecture & Organization</p>
+    </header>
+
+    <div id="quiz-view">
+        <div id="questions-container"></div>
+        <div class="footer-actions">
+            <button class="btn btn-primary" onclick="submitQuiz()">Submit Answers</button>
+        </div>
+    </div>
+
+    <div id="result-view" class="result-view">
+        <div class="score-board">
+            <div>Your Score</div>
+            <div class="score-val" id="final-score">0/10</div>
+            <div id="score-comment">Good effort!</div>
+        </div>
+        <div id="results-summary"></div>
+        <div class="footer-actions">
+            <button class="btn btn-success" onclick="initQuiz()">Try Another 10 Questions</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast">Question copied to clipboard!</div>
+
+<script>
+    const allQuestions = [
+        { "question_number": 1, "type": "Numerical", "topic": "Caching - Mapping & Size", "question": "A 4-way set-associative cache has a total capacity of 64 KB. The block size is 32 bytes and the main memory address is 32 bits. How many bits are required for the Tag field?", "correct_answer": "18" },
+        { "question_number": 2, "type": "Multiple Choice", "topic": "Caching - Performance", "question": "In a two-level cache system, L1 has a hit rate of 90% and a hit time of 1 cycle. L2 has a hit rate of 80% and a hit time of 10 cycles. Main memory access time is 100 cycles. What is the average memory access time (AMAT)?", "options": { "A": "2.8 cycles", "B": "3.2 cycles", "C": "4.0 cycles", "D": "5.5 cycles" }, "correct_answer": "C" },
+        { "question_number": 3, "type": "Multiple Select", "topic": "Caching - Concepts", "question": "Which of the following increases as the block size in a fixed-size cache increases?", "options": { "A": "Spatial Locality utilization", "B": "Compulsory Misses (initially)", "C": "Miss Penalty", "D": "Conflict Misses" }, "correct_answer": ["A", "C"] },
+        { "question_number": 4, "type": "Numerical", "topic": "Caching - Mapping", "question": "A direct-mapped cache has 1024 blocks, and each block is 16 bytes. If the byte address is 0xABCD1234, what is the index (in decimal) to which this address maps?", "correct_answer": "547" },
+        { "question_number": 5, "type": "Numerical", "topic": "Caching - Write Policies", "question": "A system uses a Write-Through policy. Cache hit time is 2 ns, and memory write time is 50 ns. If 10% of instructions are stores and the cache hit rate is 95%, what is the average time for a write operation (in ns)?", "correct_answer": "50" },
+        { "question_number": 6, "type": "Multiple Choice", "topic": "Caching - Replacement", "question": "Which replacement policy is most susceptible to Belady's Anomaly?", "options": { "A": "LRU", "B": "FIFO", "C": "Optimal", "D": "MRU" }, "correct_answer": "B" },
+        { "question_number": 7, "type": "Numerical", "topic": "Caching - Hardware", "question": "A 16 KB 2-way set associative cache uses 32-byte blocks. How many comparators are required for the tag match?", "correct_answer": "2" },
+        { "question_number": 8, "type": "Multiple Select", "topic": "Caching - Misses", "question": "Which types of cache misses can be reduced by increasing the associativity of the cache?", "options": { "A": "Compulsory Misses", "B": "Conflict Misses", "C": "Capacity Misses", "D": "Coherence Misses" }, "correct_answer": ["B"] },
+        { "question_number": 9, "type": "Numerical", "topic": "Caching - Address Partitioning", "question": "A computer uses 48-bit virtual addresses and 36-bit physical addresses. It has a 256 KB L1 cache with 64-byte blocks and 8-way associativity. How many bits are in the Physical Tag?", "correct_answer": "21" },
+        { "question_number": 10, "type": "Multiple Choice", "topic": "Caching - Locality", "question": "Which of the following code fragments best exhibits temporal locality for the variable 'sum'?", "options": { "A": "for(i=0; i<N; i++) A[i] = i;", "B": "for(i=0; i<N; i++) sum += A[i];", "C": "for(i=0; i<N; i++) A[i] = B[i] + C[i];", "D": "for(i=0; i<N; i+=100) A[i] = 0;" }, "correct_answer": "B" },
+        { "question_number": 11, "type": "Numerical", "topic": "Caching - Performance", "question": "A processor has a CPI of 1.5 with no memory stalls. 20% of instructions are memory accesses. The cache miss rate is 5% and the miss penalty is 40 cycles. Calculate the new CPI.", "correct_answer": "1.9" },
+        { "question_number": 12, "type": "Multiple Select", "topic": "Caching - Mapping", "question": "In a Fully Associative Cache, which of the following is/are true?", "options": { "A": "There is no Index field in the address.", "B": "A block can be placed in any cache line.", "C": "Conflict misses are non-existent.", "D": "Hardware complexity is lower than Direct Mapped." }, "correct_answer": ["A", "B", "C"] },
+        { "question_number": 13, "type": "Numerical", "topic": "Caching - Organization", "question": "A cache has 64 blocks, and it is 4-way set associative. If the block size is 128 bytes, what is the total data capacity of the cache in bytes?", "correct_answer": "8192" },
+        { "question_number": 14, "type": "Numerical", "topic": "Caching - Address Mapping", "question": "In a 32-bit address system, a cache has an 8-bit index and 6-bit offset. What is the size of the Tag in bits?", "correct_answer": "18" },
+        { "question_number": 15, "type": "Multiple Choice", "topic": "Caching - Replacement", "question": "Which replacement policy requires the use of a timestamp or a counter for every block to track the time of use?", "options": { "A": "FIFO", "B": "LRU", "C": "Random", "D": "MRU" }, "correct_answer": "B" },
+        { "question_number": 16, "type": "Numerical", "topic": "Caching - Miss Rate", "question": "An array of 1000 integers (4 bytes each) is accessed sequentially in a loop. The cache block size is 64 bytes. If the cache is initially empty, what is the number of compulsory misses?", "correct_answer": "63" },
+        { "question_number": 17, "type": "Multiple Select", "topic": "Caching - Write Buffer", "question": "A write buffer is used in conjunction with a Write-Through cache to:", "options": { "A": "Reduce the miss penalty.", "B": "Reduce the processor's wait time for memory writes.", "C": "Increase the hit rate.", "D": "Allow the processor to continue execution while memory is updated." }, "correct_answer": ["B", "D"] },
+        { "question_number": 18, "type": "Numerical", "topic": "Caching - Mapping", "question": "A system has a 1MB main memory and a 32KB direct-mapped cache with 128-byte blocks. How many blocks of main memory map to the same cache line?", "correct_answer": "32" },
+        { "question_number": 19, "type": "Numerical", "topic": "Caching - Performance", "question": "If the hit time is 1 cycle and the miss penalty is 50 cycles, what is the maximum allowable miss rate to keep the AMAT below 2 cycles?", "correct_answer": "0.02" },
+        { "question_number": 20, "type": "Multiple Choice", "topic": "Caching - Multi-level", "question": "If L1 cache is 'Inclusive' of L2 cache, then:", "options": { "A": "Everything in L1 must be in L2.", "B": "Everything in L2 must be in L1.", "C": "L1 and L2 share no data.", "D": "L1 is larger than L2." }, "correct_answer": "B" },
+        { "question_number": 21, "type": "Numerical", "topic": "Caching - Tag Bits", "question": "A 2-way set associative cache has 256 sets and 16-byte blocks. For a 32-bit address, what is the size of the Tag Array in bits (excluding valid/dirty bits)?", "correct_answer": "10240" },
+        { "question_number": 22, "type": "Multiple Select", "topic": "Caching - Cache Types", "question": "A Unified Cache (storing both instructions and data) compared to a Split Cache usually has:", "options": { "A": "Better utilization of cache space.", "B": "Higher structural hazards for pipelined processors.", "C": "Lower total miss rate.", "D": "Higher bandwidth for the CPU." }, "correct_answer": ["A", "B", "C"] },
+        { "question_number": 23, "type": "Numerical", "topic": "Caching - Address Partitioning", "question": "Consider a 64-bit address. A cache is 16-way set associative with 2^14 sets and 64-byte blocks. How many bits are used for the Tag?", "correct_answer": "44" },
+        { "question_number": 24, "type": "Multiple Choice", "topic": "Caching - Write-Back", "question": "In a Write-Back cache, the 'Dirty Bit' is used to indicate:", "options": { "A": "The block is invalid.", "B": "The block has been modified and is inconsistent with main memory.", "C": "The block is currently being read.", "D": "The block should be replaced next." }, "correct_answer": "B" },
+        { "question_number": 25, "type": "Numerical", "topic": "Caching - AMAT", "question": "L1 hit time = 1ns, L2 hit time = 10ns, Main Memory = 100ns. L1 local miss rate = 10%, L2 local miss rate = 20%. What is the global miss rate (as a percentage)?", "correct_answer": "2" },
+        { "question_number": 26, "type": "Numerical", "topic": "Caching - Byte Offset", "question": "If a cache block can store 16 double-precision floating-point numbers (8 bytes each), how many bits are required for the block offset?", "correct_answer": "7" },
+        { "question_number": 27, "type": "Multiple Select", "topic": "Caching - Efficiency", "question": "Which of the following techniques can reduce the Miss Penalty?", "options": { "A": "Critical Word First", "B": "Early Restart", "C": "Multi-level Caching", "D": "Pre-fetching" }, "correct_answer": ["A", "B", "C"] },
+        { "question_number": 28, "type": "Numerical", "topic": "Caching - Mapping", "question": "A direct-mapped cache has 512 sets and a block size of 8 bytes. For the 16-bit address 0x1234, what is the index in binary?", "correct_answer": "001000110" },
+        { "question_number": 29, "type": "Multiple Choice", "topic": "Caching - Terminology", "question": "What is 'Stall Cycles' in the context of caching?", "options": { "A": "Time taken for a hit.", "B": "Time the CPU waits due to a cache miss.", "C": "Time taken to decode an instruction.", "D": "Time taken to write a dirty block back." }, "correct_answer": "B" },
+        { "question_number": 30, "type": "Numerical", "topic": "Caching - Sets", "question": "A 256 KB cache is 8-way set associative and has a 64-byte block size. How many sets are there in this cache?", "correct_answer": "512" },
+        { "question_number": 31, "type": "Multiple Choice", "topic": "Caching - Policies", "question": "A Write-Allocate policy is most commonly used with which write-hit policy?", "options": { "A": "Write-Through", "B": "Write-Back", "C": "No-Write-Allocate", "D": "Write-Around" }, "correct_answer": "B" },
+        { "question_number": 32, "type": "Numerical", "topic": "Caching - Address Bits", "question": "In a system with a 24-bit address, a 2-way set associative cache has a block size of 16 bytes and a total size of 8 KB. What is the value of the Index bits + Tag bits?", "correct_answer": "20" },
+        { "question_number": 33, "type": "Multiple Select", "topic": "Caching - 3 C's", "question": "Increasing the cache size generally reduces which of the following?", "options": { "A": "Compulsory misses", "B": "Capacity misses", "C": "Conflict misses", "D": "Miss Penalty" }, "correct_answer": ["B", "C"] },
+        { "question_number": 34, "type": "Numerical", "topic": "Caching - Memory Access", "question": "Consider a program that executes 1000 instructions. 300 are data loads/stores. If the instruction cache miss rate is 2% and the data cache miss rate is 10%, how many total cache misses occur?", "correct_answer": "50" },
+        { "question_number": 35, "type": "Multiple Choice", "topic": "Caching - Optimization", "question": "Which optimization primarily targets 'Conflict Misses'?", "options": { "A": "Larger Block Size", "B": "Higher Associativity", "C": "Larger Cache Size", "D": "Pre-fetching" }, "correct_answer": "B" },
+        { "question_number": 36, "type": "Numerical", "topic": "Caching - Address", "question": "A system has a 32-bit address. A fully associative cache has 128 lines and 32-byte blocks. How many bits are used for the Tag?", "correct_answer": "27" },
+        { "question_number": 37, "type": "Numerical", "topic": "Caching - AMAT", "question": "Average Memory Access Time (AMAT) is 10 ns. Hit time is 2 ns. Miss penalty is 80 ns. What is the hit rate (in percentage)?", "correct_answer": "90" },
+        { "question_number": 38, "type": "Multiple Select", "topic": "Caching - Performance", "question": "Which of the following are valid ways to improve the Effective Access Time?", "options": { "A": "Decreasing hit time", "B": "Decreasing miss rate", "C": "Decreasing miss penalty", "D": "Increasing miss penalty" }, "correct_answer": ["A", "B", "C"] },
+        { "question_number": 39, "type": "Numerical", "topic": "Caching - Storage", "question": "For a 4 KB Direct Mapped cache with 16 byte blocks and 32-bit addresses, how many total bits of storage are required for the Tag directory (Tag bits + Valid bit)?", "correct_answer": "4864" },
+        { "question_number": 40, "type": "Numerical", "topic": "Caching - Loop", "question": "A loop 'for(i=0; i<128; i++) sum += A[i]' runs on a system with 32-byte cache blocks. 'A' is an array of 4-byte integers starting at a block boundary. How many compulsory misses occur for 'A'?", "correct_answer": "16" },
+        { "question_number": 41, "type": "Multiple Choice", "topic": "Caching - Victim Cache", "question": "A Victim Cache is used to:", "options": { "A": "Increase the capacity of the main cache.", "B": "Store blocks evicted from the main cache due to conflict misses.", "C": "Predict the next block to be accessed.", "D": "Handle write-back operations." }, "correct_answer": "B" },
+        { "question_number": 42, "type": "Numerical", "topic": "Caching - Set Associative", "question": "If a cache is 16-way set associative and contains 4096 blocks, how many bits are required for the Index field?", "correct_answer": "8" },
+        { "question_number": 43, "type": "Numerical", "topic": "Caching - Performance", "question": "System A has AMAT of 5ns. System B is identical but has a 2nd level cache with hit time 10ns and local hit rate 80%. If the original miss penalty was 100ns, what is the new AMAT (in ns)?", "correct_answer": "2" },
+        { "question_number": 44, "type": "Multiple Select", "topic": "Caching - Hardware", "question": "In a Set Associative cache, which fields of the address are used to determine if a hit occurred?", "options": { "A": "Tag", "B": "Index", "C": "Byte Offset", "D": "Block Offset" }, "correct_answer": ["A", "B"] },
+        { "question_number": 45, "type": "Numerical", "topic": "Caching - Memory", "question": "A main memory has 2^32 bytes. A cache has 2^16 blocks of 64 bytes each. What is the ratio of Main Memory size to Cache size?", "correct_answer": "1024" },
+        { "question_number": 46, "type": "Multiple Choice", "topic": "Caching - Locality", "question": "Which of the following mostly benefits from a larger block size?", "options": { "A": "Temporal Locality", "B": "Spatial Locality", "C": "Conflict Miss reduction", "D": "Hit Time reduction" }, "correct_answer": "B" },
+        { "question_number": 47, "type": "Numerical", "topic": "Caching - Index", "question": "A 128 KB 4-way set associative cache has 64-byte blocks. What is the decimal value of the highest possible index?", "correct_answer": "511" },
+        { "question_number": 48, "type": "Numerical", "topic": "Caching - Bits", "question": "How many bits are in a 32-bit address if the cache is 8 KB, Direct Mapped, and has 32-byte blocks? (Find Tag bits)", "correct_answer": "19" },
+        { "question_number": 49, "type": "Multiple Choice", "topic": "Caching - Strategy", "question": "The 'Write-Around' policy means:", "options": { "A": "Writes are updated in cache only.", "B": "Writes are updated in memory only, bypassing cache on a miss.", "C": "Writes are always written to both.", "D": "Cache is invalidated on every write." }, "correct_answer": "B" },
+        { "question_number": 50, "type": "Numerical", "topic": "Caching - Tags", "question": "In a 4-way set associative cache with 1024 total blocks and 32-byte blocks, and 32-bit addresses, how many bits are used for the tag?", "correct_answer": "19" },
+        { "question_number": 51, "type": "Multiple Select", "topic": "Caching - General", "question": "Which of the following is/are false?", "options": { "A": "Cache memory is usually implemented using DRAM.", "B": "L1 cache is faster than L2 cache.", "C": "The index field is not used in a fully associative cache.", "D": "A write-back cache requires a dirty bit." }, "correct_answer": ["A"] },
+        { "question_number": 52, "type": "Numerical", "topic": "Caching - Cycles", "question": "If a processor runs at 2 GHz and a cache miss penalty is 100 ns, how many clock cycles are lost per miss?", "correct_answer": "200" },
+        { "question_number": 53, "type": "Numerical", "topic": "Caching - LRU", "question": "In a 2-way set associative cache with LRU, how many bits are needed per set to implement the LRU policy?", "correct_answer": "1" },
+        { "question_number": 54, "type": "Multiple Choice", "topic": "Caching - Miss Rate", "question": "If we double the block size but keep the cache size the same, the number of sets will:", "options": { "A": "Double", "B": "Halve", "C": "Stay the same", "D": "Quadruple" }, "correct_answer": "B" },
+        { "question_number": 55, "type": "Numerical", "topic": "Caching - AMAT", "question": "Given L1 hit time = 2 cycles, L2 hit time = 15 cycles, L1 miss rate = 5%, L2 miss rate = 10%, and Main Memory access = 200 cycles. Find AMAT.", "correct_answer": "3.75" },
+        { "question_number": 56, "type": "Multiple Select", "topic": "Caching - Write Hit", "question": "A Write-Through cache has which of the following characteristics?", "options": { "A": "Simpler to implement than Write-Back.", "B": "Requires a dirty bit.", "C": "Main memory is always consistent with the cache.", "D": "Generates more memory traffic than Write-Back." }, "correct_answer": ["A", "C", "D"] },
+        { "question_number": 57, "type": "Numerical", "topic": "Caching - Address", "question": "A cache is 64 KB, 8-way set associative, and has 64-byte blocks. The CPU generates 32-bit addresses. What is the value of the index for address 0x00008432?", "correct_answer": "272" },
+        { "question_number": 58, "type": "Numerical", "topic": "Caching - Bits", "question": "For a 2 MB 16-way set associative cache with 128-byte blocks and 48-bit addresses, calculate the number of Tag bits.", "correct_answer": "31" },
+        { "question_number": 59, "type": "Multiple Choice", "topic": "Caching - Conflict", "question": "In which cache organization are conflict misses most likely to occur?", "options": { "A": "Fully Associative", "B": "Direct Mapped", "C": "4-way Set Associative", "D": "8-way Set Associative" }, "correct_answer": "B" },
+        { "question_number": 60, "type": "Numerical", "topic": "Caching - Block Count", "question": "A 1 MB cache has 64-byte blocks. How many total blocks are there? (Express as 2^x, provide x)", "correct_answer": "14" },
+        { "question_number": 61, "type": "Multiple Select", "topic": "Caching - Hierarchy", "question": "Multi-level caches are used to:", "options": { "A": "Reduce the overall miss penalty.", "B": "Increase the hit rate of the first level.", "C": "Bridge the gap between CPU speed and Main Memory speed.", "D": "Reduce hit time of L1." }, "correct_answer": ["A", "C"] },
+        { "question_number": 62, "type": "Numerical", "topic": "Caching - AMAT NAT", "question": "Hit time is 1 cycle. Miss rate is 2%. Miss penalty is 100 cycles. AMAT = ?", "correct_answer": "3" },
+        { "question_number": 63, "type": "Numerical", "topic": "Caching - Tag Storage", "question": "A 32 KB direct-mapped cache has 32-byte blocks. Address is 32 bits. How many Kilobits are needed just for the Tag storage?", "correct_answer": "17.408" },
+        { "question_number": 64, "type": "Multiple Choice", "topic": "Caching - Policy", "question": "If a cache miss occurs and we bring the block into the cache but do not update it in the cache for a write, the policy is:", "options": { "A": "Write-Allocate", "B": "No-Write-Allocate", "C": "Write-Back", "D": "Write-Through" }, "correct_answer": "B" },
+        { "question_number": 65, "type": "Numerical", "topic": "Caching - Mapping", "question": "Main memory is 4 GB. Cache is 512 KB. Block size is 64 bytes. If it's direct mapped, how many memory blocks map to one cache block?", "correct_answer": "8192" },
+        { "question_number": 66, "type": "Numerical", "topic": "Caching - Hex Address", "question": "A cache has 1024 sets. Block size is 16 bytes. To which set does the address 0xFFFF0010 map?", "correct_answer": "1" },
+        { "question_number": 67, "type": "Multiple Select", "topic": "Caching - Logic", "question": "A higher associativity cache:", "options": { "A": "Decreases hit time.", "B": "Decreases conflict misses.", "C": "Increases hit time.", "D": "Decreases miss penalty." }, "correct_answer": ["B", "C"] },
+        { "question_number": 68, "type": "Numerical", "topic": "Caching - AMAT", "question": "If miss penalty is 20 times the hit time, and AMAT is 1.2 times the hit time, what is the hit rate?", "correct_answer": "0.99" },
+        { "question_number": 69, "type": "Numerical", "topic": "Caching - Word Addressable", "question": "A system is 32-bit word addressable. The cache block size is 8 words. How many bits are needed for the word offset?", "correct_answer": "3" },
+        { "question_number": 70, "type": "Multiple Choice", "topic": "Caching - Replacement", "question": "Which replacement policy easiest to implement in a direct-mapped cache?", "options": { "A": "LRU", "B": "FIFO", "C": "None needed", "D": "Random" }, "correct_answer": "C" },
+        { "question_number": 71, "type": "Numerical", "topic": "Caching - Cache Line", "question": "A 128 KB cache is 4-way set associative with 32-byte blocks. How many lines are in each set?", "correct_answer": "4" },
+        { "question_number": 72, "type": "Multiple Select", "topic": "Caching - Locality", "question": "Spatial locality is best exploited by:", "options": { "A": "Small block size", "B": "Large block size", "C": "Prefetching", "D": "Large Cache size" }, "correct_answer": ["B", "C"] },
+        { "question_number": 73, "type": "Numerical", "topic": "Caching - Hits", "question": "A sequence of accesses to a 2-block direct-mapped cache is: 0, 1, 2, 0, 1, 2. How many hits occur (cache starts empty)?", "correct_answer": "0" },
+        { "question_number": 74, "type": "Numerical", "topic": "Caching - Bits", "question": "A 32-bit address, 2-way set associative cache, 64 KB total size, 64-byte blocks. Tag bits = ?", "correct_answer": "17" },
+        { "question_number": 75, "type": "Multiple Choice", "topic": "Caching - Misses", "question": "Which type of miss cannot be avoided by any cache size or associativity?", "options": { "A": "Conflict", "B": "Capacity", "C": "Compulsory", "D": "Write-miss" }, "correct_answer": "C" },
+        { "question_number": 76, "type": "Numerical", "topic": "Caching - Performance", "question": "Instruction mix: 25% Loads, 10% Stores, 65% Others. Instruction Cache Miss Rate = 1%, Data Cache Miss Rate = 5%. Miss Penalty = 100 cycles. Stalls per instruction = ?", "correct_answer": "2.75" },
+        { "question_number": 77, "type": "Numerical", "topic": "Caching - Virtual Memory", "question": "A 16 KB cache has 32-byte blocks. If it is physically indexed and physically tagged, and page size is 4 KB, how many bits of the index come from the virtual page offset?", "correct_answer": "7" },
+        { "question_number": 78, "type": "Multiple Select", "topic": "Caching - Sets", "question": "If a cache is fully associative:", "options": { "A": "The number of sets is 1.", "B": "The number of sets equals the number of blocks.", "C": "The index field is 0 bits.", "D": "The tag field is maximum." }, "correct_answer": ["A", "C", "D"] },
+        { "question_number": 79, "type": "Numerical", "topic": "Caching - Memory Address", "question": "A cache has 256 sets, 4-way associativity, and 16-byte blocks. How many blocks are in the cache?", "correct_answer": "1024" },
+        { "question_number": 80, "type": "Numerical", "topic": "Caching - AMAT", "question": "CPU frequency is 1GHz. AMAT is 2 ns. Hit time is 1 ns. Miss penalty is 50 ns. What is the miss rate?", "correct_answer": "0.02" },
+        { "question_number": 81, "type": "Multiple Choice", "topic": "Caching - Write Through", "question": "Why is a write-through cache often paired with a write buffer?", "options": { "A": "To handle dirty blocks.", "B": "To prevent the CPU from stalling during a memory write.", "C": "To increase hit rate.", "D": "To reduce compulsory misses." }, "correct_answer": "B" },
+        { "question_number": 82, "type": "Numerical", "topic": "Caching - Address", "question": "In a 48-bit address system, a cache uses 12 bits for index and 6 bits for offset. Tag = ?", "correct_answer": "30" },
+        { "question_number": 83, "type": "Multiple Select", "topic": "Caching - Architecture", "question": "Harvard Architecture (Split L1) helps in:", "options": { "A": "Reducing conflict misses.", "B": "Allowing simultaneous instruction fetch and data access.", "C": "Increasing cache size.", "D": "Eliminating structural hazards in a pipeline." }, "correct_answer": ["B", "D"] },
+        { "question_number": 84, "type": "Numerical", "topic": "Caching - LRU Counter", "question": "To implement LRU in a 4-way set associative cache, how many bits per set are required for the 'Pseudo-LRU' tree approach?", "correct_answer": "3" },
+        { "question_number": 85, "type": "Numerical", "topic": "Caching - Compulsory Misses", "question": "An array of 2048 4-byte floats is read twice. Cache is 16 KB, 32-byte blocks, Direct Mapped. Total misses?", "correct_answer": "256" },
+        { "question_number": 86, "type": "Multiple Choice", "topic": "Caching - AMAT Formula", "question": "AMAT is calculated as:", "options": { "A": "Hit Time + Miss Rate * Miss Penalty", "B": "Hit Time * Hit Rate + Miss Penalty", "C": "Miss Rate * Miss Penalty", "D": "Hit Time / Hit Rate" }, "correct_answer": "A" },
+        { "question_number": 87, "type": "Numerical", "topic": "Caching - Mapping NAT", "question": "A address 0x12345678 is sent to a 4-way set associative cache with 1024 sets and 64-byte blocks. Index = ?", "correct_answer": "601" },
+        { "question_number": 88, "type": "Multiple Select", "topic": "Caching - Design", "question": "Direct-mapped caches have:", "options": { "A": "Zero conflict misses.", "B": "Fastest hit time.", "C": "Simplest replacement logic.", "D": "Highest miss rate for a given size." }, "correct_answer": ["B", "C", "D"] },
+        { "question_number": 89, "type": "Numerical", "topic": "Caching - Tag size", "question": "A 32-bit address, 1 MB Direct Mapped cache, 128-byte blocks. Tag array size in bits?", "correct_answer": "122880" },
+        { "question_number": 90, "type": "Numerical", "topic": "Caching - Performance", "question": "A program has a miss rate of 10%. If the miss penalty is 50 ns and hit time is 2 ns, what is the AMAT in ns?", "correct_answer": "7" },
+        { "question_number": 91, "type": "Multiple Choice", "topic": "Caching - Replacement policy", "question": "Which policy replaces the block that has not been used for the longest period of time?", "options": { "A": "FIFO", "B": "LRU", "C": "LFU", "D": "MRU" }, "correct_answer": "B" },
+        { "question_number": 92, "type": "Numerical", "topic": "Caching - Set bits", "question": "For an 8-way set associative cache with 2^15 total blocks, how many bits are in the index field?", "correct_answer": "12" },
+        { "question_number": 93, "type": "Multiple Select", "topic": "Caching - Multilevel", "question": "In a multilevel cache, 'Local Miss Rate' is:", "options": { "A": "Misses in that level / Total memory accesses by CPU.", "B": "Misses in that level / Accesses to that level.", "C": "Always higher than global miss rate for L2.", "D": "Used to calculate global miss rate." }, "correct_answer": ["B", "D"] },
+        { "question_number": 94, "type": "Numerical", "topic": "Caching - Cache Line", "question": "A cache has a block size of 64 bytes. If the address is 0x1000, what is the address of the first byte of the next block?", "correct_answer": "4160" },
+        { "question_number": 95, "type": "Numerical", "topic": "Caching - Speedup", "question": "If cache reduces AMAT from 100ns to 10ns, what is the speedup?", "correct_answer": "10" },
+        { "question_number": 96, "type": "Multiple Choice", "topic": "Caching - Inclusivity", "question": "If L1 is exclusive of L2:", "options": { "A": "A block in L1 cannot be in L2.", "B": "L2 is a copy of L1.", "C": "L1 is always larger than L2.", "D": "Memory is not needed." }, "correct_answer": "A" },
+        { "question_number": 97, "type": "Numerical", "topic": "Caching - Tag bits", "question": "64-bit address, 4 MB 16-way cache, 64-byte blocks. Tag bits = ?", "correct_answer": "46" },
+        { "question_number": 98, "type": "Multiple Select", "topic": "Caching - Write Policies", "question": "Write-back is preferred over write-through because:", "options": { "A": "It is easier to implement.", "B": "It reduces memory bandwidth usage.", "C": "Multiple writes to the same block don't require multiple memory writes.", "D": "It is faster for writes." }, "correct_answer": ["B", "C", "D"] },
+        { "question_number": 99, "type": "Numerical", "topic": "Caching - Logic", "question": "Number of sets in a 128 KB fully associative cache with 64-byte blocks?", "correct_answer": "1" },
+        { "question_number": 100, "type": "Numerical", "topic": "Caching - Index bits", "question": "A 2-way set associative cache has 512 blocks. How many bits for the index?", "correct_answer": "8" }
+    ];
+
+    let currentQuestions = [];
+
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+
+    function initQuiz() {
+        document.getElementById('quiz-view').style.display = 'block';
+        document.getElementById('result-view').style.display = 'none';
+        window.scrollTo(0,0);
+        
+        // Select 10 random questions
+        currentQuestions = shuffle([...allQuestions]).slice(0, 10);
+        
+        const container = document.getElementById('questions-container');
+        container.innerHTML = '';
+
+        currentQuestions.forEach((q, index) => {
+            const block = document.createElement('div');
+            block.className = 'question-block';
+            block.id = `block-${index}`;
+
+            let inputHTML = '';
+            if (q.type === "Numerical") {
+                inputHTML = `<input type="text" class="numerical-input" placeholder="Enter numerical value" data-idx="${index}">`;
+            } else if (q.type === "Multiple Choice") {
+                inputHTML = '<div class="options-grid">';
+                for (let key in q.options) {
+                    inputHTML += `
+                        <label class="option-label">
+                            <input type="radio" name="q-${index}" value="${key}" data-idx="${index}">
+                            ${key}: ${q.options[key]}
+                        </label>`;
+                }
+                inputHTML += '</div>';
+            } else if (q.type === "Multiple Select") {
+                inputHTML = '<div class="options-grid">';
+                for (let key in q.options) {
+                    inputHTML += `
+                        <label class="option-label">
+                            <input type="checkbox" name="q-${index}" value="${key}" data-idx="${index}">
+                            ${key}: ${q.options[key]}
+                        </label>`;
+                }
+                inputHTML += '</div>';
+            }
+
+            block.innerHTML = `
+                <div class="question-header">
+                    <div class="header-left">
+                        <span class="meta">Question ${index + 1}</span>
+                        <span class="topic-badge">${q.topic}</span>
+                    </div>
+                </div>
+                <div class="question-text" id="qtext-${index}">${q.question}</div>
+                ${inputHTML}
+                <div id="feedback-${index}" class="feedback hidden"></div>
+            `;
+            container.appendChild(block);
+        });
+    }
+
+    function submitQuiz() {
+        let score = 0;
+        const summary = document.getElementById('results-summary');
+        summary.innerHTML = '';
+
+        currentQuestions.forEach((q, index) => {
+            let isCorrect = false;
+            let userAnswer = "";
+
+            if (q.type === "Numerical") {
+                const input = document.querySelector(`input[data-idx="${index}"]`);
+                userAnswer = input.value.trim().toLowerCase();
+                isCorrect = userAnswer === q.correct_answer.toLowerCase();
+            } else if (q.type === "Multiple Choice") {
+                const selected = document.querySelector(`input[name="q-${index}"]:checked`);
+                userAnswer = selected ? selected.value : "";
+                isCorrect = userAnswer === q.correct_answer;
+            } else if (q.type === "Multiple Select") {
+                const checked = Array.from(document.querySelectorAll(`input[name="q-${index}"]:checked`)).map(el => el.value);
+                userAnswer = checked;
+                // Check if arrays match
+                isCorrect = checked.length === q.correct_answer.length && 
+                            checked.every(v => q.correct_answer.includes(v));
+            }
+
+            if (isCorrect) score++;
+
+            // Clone the question block for results
+            const resultBlock = document.getElementById(`block-${index}`).cloneNode(true);
+            
+            // Add Copy Button to the header
+            const header = resultBlock.querySelector('.question-header');
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+            `;
+            // Get original question text safely
+            const textToCopy = q.question;
+            copyBtn.onclick = () => copyToClipboard(textToCopy);
+            header.appendChild(copyBtn);
+
+            const feedback = resultBlock.querySelector('.feedback');
+            feedback.classList.remove('hidden');
+            
+            if (isCorrect) {
+                feedback.classList.add('correct');
+                feedback.innerHTML = `Correct! Your answer: ${formatAnswer(userAnswer)}`;
+            } else {
+                feedback.classList.add('incorrect');
+                feedback.innerHTML = `Incorrect. Your answer: ${formatAnswer(userAnswer)}
+                    <span class="correct-answer-text">Correct Answer: ${formatAnswer(q.correct_answer)}</span>`;
+            }
+            
+            summary.appendChild(resultBlock);
+        });
+
+        document.getElementById('final-score').innerText = `${score}/10`;
+        
+        let comment = "Keep practicing!";
+        if (score === 10) comment = "Perfect! You are a master!";
+        else if (score >= 8) comment = "Excellent understanding!";
+        else if (score >= 5) comment = "Good effort, but room for improvement.";
+        document.getElementById('score-comment').innerText = comment;
+
+        document.getElementById('quiz-view').style.display = 'none';
+        document.getElementById('result-view').style.display = 'block';
+        window.scrollTo(0,0);
+    }
+
+    function formatAnswer(ans) {
+        if (Array.isArray(ans)) return ans.sort().join(", ") || "None";
+        return ans || "No answer";
+    }
+
+    function copyToClipboard(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            showToast();
+        } catch (err) {
+            console.error('Unable to copy', err);
+        }
+        document.body.removeChild(textArea);
+    }
+
+    function showToast() {
+        const toast = document.getElementById("toast");
+        toast.className = "show";
+        setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+
+    // Initialize on load
+    window.onload = initQuiz;
+</script>
+
+</body>
+</html>
