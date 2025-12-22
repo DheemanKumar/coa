@@ -141,19 +141,21 @@
             background: #f1f5f9;
             color: var(--secondary);
             border: 1px solid #e2e8f0;
-            padding: 4px 8px;
+            padding: 4px 12px;
             border-radius: 4px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .copy-btn:hover {
             background: #e2e8f0;
             color: var(--text);
+            border-color: var(--secondary);
         }
 
         /* Results Styles */
@@ -194,18 +196,19 @@
         /* Toast Notification */
         #toast {
             visibility: hidden;
-            min-width: 200px;
-            background-color: #333;
+            min-width: 250px;
+            background-color: #1e293b;
             color: #fff;
             text-align: center;
-            border-radius: 4px;
-            padding: 12px;
+            border-radius: 8px;
+            padding: 14px;
             position: fixed;
             z-index: 1000;
             left: 50%;
             bottom: 30px;
             transform: translateX(-50%);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         #toast.show {
@@ -245,7 +248,7 @@
     </div>
 </div>
 
-<div id="toast">Question copied to clipboard!</div>
+<div id="toast">Question and options copied!</div>
 
 <script>
     const allQuestions = [
@@ -305,7 +308,7 @@
         { "question_number": 54, "type": "Multiple Choice", "topic": "Caching - Miss Rate", "question": "If we double the block size but keep the cache size the same, the number of sets will:", "options": { "A": "Double", "B": "Halve", "C": "Stay the same", "D": "Quadruple" }, "correct_answer": "B" },
         { "question_number": 55, "type": "Numerical", "topic": "Caching - AMAT", "question": "Given L1 hit time = 2 cycles, L2 hit time = 15 cycles, L1 miss rate = 5%, L2 miss rate = 10%, and Main Memory access = 200 cycles. Find AMAT.", "correct_answer": "3.75" },
         { "question_number": 56, "type": "Multiple Select", "topic": "Caching - Write Hit", "question": "A Write-Through cache has which of the following characteristics?", "options": { "A": "Simpler to implement than Write-Back.", "B": "Requires a dirty bit.", "C": "Main memory is always consistent with the cache.", "D": "Generates more memory traffic than Write-Back." }, "correct_answer": ["A", "C", "D"] },
-        { "question_number": 57, "type": "Numerical", "topic": "Caching - Address", "question": "A cache is 64 KB, 8-way set associative, and has 64-byte blocks. The CPU generates 32-bit addresses. What is the value of the index for address 0x00008432?", "correct_answer": "272" },
+        { "question_number": 57, "type": "Numerical", "topic": "Caching - Address", "question": "A cache is 64 KB, 8-way set associative, and has 64-byte blocks. The CPU generates 32-bit addresses. What is the value of the index for address 0x00008432?", "correct_answer": "16" },
         { "question_number": 58, "type": "Numerical", "topic": "Caching - Bits", "question": "For a 2 MB 16-way set associative cache with 128-byte blocks and 48-bit addresses, calculate the number of Tag bits.", "correct_answer": "31" },
         { "question_number": 59, "type": "Multiple Choice", "topic": "Caching - Conflict", "question": "In which cache organization are conflict misses most likely to occur?", "options": { "A": "Fully Associative", "B": "Direct Mapped", "C": "4-way Set Associative", "D": "8-way Set Associative" }, "correct_answer": "B" },
         { "question_number": 60, "type": "Numerical", "topic": "Caching - Block Count", "question": "A 1 MB cache has 64-byte blocks. How many total blocks are there? (Express as 2^x, provide x)", "correct_answer": "14" },
@@ -362,7 +365,6 @@
         document.getElementById('result-view').style.display = 'none';
         window.scrollTo(0,0);
         
-        // Select 10 random questions
         currentQuestions = shuffle([...allQuestions]).slice(0, 10);
         
         const container = document.getElementById('questions-container');
@@ -405,7 +407,7 @@
                         <span class="topic-badge">${q.topic}</span>
                     </div>
                 </div>
-                <div class="question-text" id="qtext-${index}">${q.question}</div>
+                <div class="question-text">${q.question}</div>
                 ${inputHTML}
                 <div id="feedback-${index}" class="feedback hidden"></div>
             `;
@@ -433,26 +435,31 @@
             } else if (q.type === "Multiple Select") {
                 const checked = Array.from(document.querySelectorAll(`input[name="q-${index}"]:checked`)).map(el => el.value);
                 userAnswer = checked;
-                // Check if arrays match
                 isCorrect = checked.length === q.correct_answer.length && 
                             checked.every(v => q.correct_answer.includes(v));
             }
 
             if (isCorrect) score++;
 
-            // Clone the question block for results
             const resultBlock = document.getElementById(`block-${index}`).cloneNode(true);
-            
-            // Add Copy Button to the header
             const header = resultBlock.querySelector('.question-header');
+            
+            // Format Copy Text including Options
+            let textToCopy = q.question;
+            if (q.options && Object.keys(q.options).length > 0) {
+                textToCopy += "\n\nOptions:";
+                for (let key in q.options) {
+                    textToCopy += `\n${key}: ${q.options[key]}`;
+                }
+            }
+            textToCopy += `\n\nCorrect Answer: ${formatAnswer(q.correct_answer)}`;
+
             const copyBtn = document.createElement('button');
             copyBtn.className = 'copy-btn';
             copyBtn.innerHTML = `
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                Copy
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy Context
             `;
-            // Get original question text safely
-            const textToCopy = q.question;
             copyBtn.onclick = () => copyToClipboard(textToCopy);
             header.appendChild(copyBtn);
 
@@ -509,7 +516,6 @@
         setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
     }
 
-    // Initialize on load
     window.onload = initQuiz;
 </script>
 
