@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Architecture - Pipelining Quiz</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--background);
+            padding-bottom: 1rem;
+        }
+
+        h1 { margin: 0; color: var(--primary); }
+        .meta { color: var(--secondary); font-size: 0.9rem; }
+
+        .question-block {
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 10px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .topic-badge {
+            background: #dbeafe;
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f1f5f9;
+        }
+
+        .option-label input {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .numerical-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .footer-actions {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            border: none;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        
+        .btn:hover { opacity: 0.9; }
+
+        .copy-btn {
+            background: #f1f5f9;
+            color: var(--secondary);
+            border: 1px solid #e2e8f0;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #e2e8f0;
+            color: var(--text);
+            border-color: var(--secondary);
+        }
+
+        /* Results Styles */
+        .result-view { display: none; }
+        
+        .score-board {
+            text-align: center;
+            padding: 2rem;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .score-val {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .feedback.correct { background: #dcfce7; color: #166534; border-left: 4px solid var(--success); }
+        .feedback.incorrect { background: #fee2e2; color: #991b1b; border-left: 4px solid var(--danger); }
+
+        .correct-answer-text {
+            font-weight: bold;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .hidden { display: none; }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 14px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 0.95rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Pipelining Master</h1>
+        <p class="meta">10 Random Questions | Computer Architecture & Organization</p>
+    </header>
+
+    <div id="quiz-view">
+        <div id="questions-container"></div>
+        <div class="footer-actions">
+            <button class="btn btn-primary" onclick="submitQuiz()">Submit Answers</button>
+        </div>
+    </div>
+
+    <div id="result-view" class="result-view">
+        <div class="score-board">
+            <div>Your Score</div>
+            <div class="score-val" id="final-score">0/10</div>
+            <div id="score-comment">Good effort!</div>
+        </div>
+        <div id="results-summary"></div>
+        <div class="footer-actions">
+            <button class="btn btn-success" onclick="initQuiz()">Try Another 10 Questions</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast">Question and options copied!</div>
+
+<script>
+    const allQuestions = [
+            { "question_number": 1, "type": "Numerical", "topic": "Pipeline Performance", "question": "A 5-stage pipeline has stage delays of 150 ns, 120 ns, 160 ns, 140 ns, and 110 ns. The pipeline registers (latches) add a delay of 10 ns between stages. What is the clock cycle time of this pipeline in nanoseconds?", "correct_answer": "170" },
+            { "question_number": 2, "type": "Numerical", "topic": "Speedup Calculation", "question": "A non-pipelined processor takes 60 ns to execute one instruction. A pipelined version of the same processor has 6 stages, each taking 10 ns, with a pipeline overhead of 2 ns per stage. What is the speedup achieved by the pipeline for a sequence of 1000 instructions?", "correct_answer": "4.975" },
+            { "question_number": 3, "type": "Multiple Choice", "topic": "Pipeline Efficiency", "question": "A 4-stage pipeline is used to execute a program of 100 instructions. The clock cycle time is 10 ns. If the pipeline is perfectly balanced and there are no stalls, what is the efficiency of the pipeline?", "options": { "A": "24.2%", "B": "97.1%", "C": "100%", "D": "89.5%" }, "correct_answer": "B" },
+            { "question_number": 4, "type": "Multiple Choice", "topic": "Data Hazards", "question": "In a 5-stage MIPS pipeline (IF, ID, EX, MEM, WB) with full forwarding hardware, how many stall cycles are inserted for the following instruction sequence?\nLW R1, 0(R2)\nADD R3, R1, R4", "options": { "A": "0", "B": "1", "C": "2", "D": "3" }, "correct_answer": "B" },
+            { "question_number": 5, "type": "Multiple Choice", "topic": "Data Hazards", "question": "Consider the same 5-stage MIPS pipeline (IF, ID, EX, MEM, WB) BUT with NO forwarding hardware. How many stall cycles are needed for:\nADD R1, R2, R3\nSUB R4, R1, R5", "options": { "A": "0", "B": "1", "C": "2", "D": "3" }, "correct_answer": "C" },
+            { "question_number": 6, "type": "Numerical", "topic": "Throughput Calculation", "question": "A processor has a clock cycle of 2 ns. It executes a program with 1,000,000 instructions. The pipeline has 5 stages. 20% of instructions are branches. The branch penalty is 3 cycles for every branch. What is the throughput of this processor in MIPS?", "correct_answer": "312.5" },
+            { "question_number": 7, "type": "Multiple Choice", "topic": "Branch Hazards", "question": "A pipeline uses a 'Delayed Branch' technique with 1 delay slot. The compiler fills the delay slot with a useful instruction (move from before branch) 80% of the time, and a NOP 20% of the time. What is the effective penalty associated with branches?", "options": { "A": "1 cycle", "B": "0 cycles", "C": "0.2 cycles", "D": "0.8 cycles" }, "correct_answer": "C" },
+            { "question_number": 8, "type": "Multiple Select", "topic": "Structural Hazards", "question": "Which of the following can cause a Structural Hazard in a standard pipelined processor?", "options": { "A": "A single cache used for both Data and Instructions.", "B": "Branch instruction target calculation.", "C": "Register file with only 1 write port when 2 instructions try to write.", "D": "Read After Write dependency." }, "correct_answer": ["A", "C"] },
+            { "question_number": 9, "type": "Numerical", "topic": "Stage Splitting", "question": "A processor has 5 stages with delays: 800ps, 500ps, 400ps, 300ps, 100ps. You can split the longest stage into two equal stages of 400ps each. The latch delay is 20ps. How much does the clock cycle time improve (in ps) after splitting?", "correct_answer": "300" },
+            { "question_number": 10, "type": "Numerical", "topic": "Assembly Analysis", "question": "Calculate the number of cycles to execute this loop 2 times on a 5-stage pipeline with full forwarding. The branch is taken at the EX stage (assume no branch prediction, 2 stall cycles if taken).\n\nLoop: LW R2, 0(R1)\nADD R2, R2, R3\nSW R2, 0(R1)\nSUB R1, R1, #4\nBNE R1, R0, Loop", "correct_answer": "16" },
+            { "question_number": 11, "type": "Numerical", "topic": "CPI Calculation", "question": "A machine has a 400 MHz clock. Instruction mix: ALU (40%, 1 cycle), Load (20%, 2 cycles), Store (10%, 2 cycles), Branch (30%, 3 cycles). What is the MIPS rating?", "correct_answer": "210.53" },
+            { "question_number": 12, "type": "Multiple Choice", "topic": "Pipeline Depth", "question": "As the pipeline depth (number of stages) increases, which of the following statements is generally true?", "options": { "A": "Data hazards decrease.", "B": "Clock cycle time decreases.", "C": "Branch penalties decrease.", "D": "Throughput always increases linearly." }, "correct_answer": "B" },
+            { "question_number": 13, "type": "Numerical", "topic": "Control Hazards", "question": "A pipeline resolves branch conditions in the ID stage (Stage 2). 25% of instructions are branches. 60% of branches are taken. If the pipeline always predicts 'Not Taken' (fetches next instruction), what is the average CPI? (Ideal CPI = 1).", "correct_answer": "1.15" },
+            { "question_number": 14, "type": "Multiple Select", "topic": "Performance Analysis", "question": "Which of the following techniques effectively reduce pipeline stall cycles due to data hazards?", "options": { "A": "Operand Forwarding (Bypassing)", "B": "Branch Prediction", "C": "Code Reordering (Software Scheduling)", "D": "Increasing Clock Frequency" }, "correct_answer": ["A", "C"] },
+            { "question_number": 15, "type": "Numerical", "topic": "Instruction Throughput", "question": "A 10-stage pipeline runs at 2 GHz. There are no stalls. What is the throughput in instructions per second?", "correct_answer": "2000000000" },
+            { "question_number": 16, "type": "Numerical", "topic": "Amdahl's Law Pipelining", "question": "An unpipelined processor takes 50ns per instruction. We split it into a 5-stage pipeline. Due to unbalance, stages take 12ns, 8ns, 10ns, 10ns, 10ns. Latch delay is 1ns. What is the speedup for infinite instructions?", "correct_answer": "3.85" },
+            { "question_number": 17, "type": "Multiple Choice", "topic": "Register File Bandwidth", "question": "In a 5-stage pipeline, the WB stage writes to the register file and the ID stage reads from it. To avoid a structural hazard in a single cycle without stalling, what property must the Register File have?", "options": { "A": "It must be double-pumped (operate at 2x frequency).", "B": "It needs independent Read and Write ports allowing simultaneous access.", "C": "It must use a master-slave flip-flop configuration.", "D": "A and B are both viable solutions." }, "correct_answer": "D" },
+            { "question_number": 18, "type": "Multiple Choice", "topic": "WAR Hazard", "question": "Consider the code:\n1. DIV R1, R2, R3\n2. ADD R2, R4, R5\nIn a complex pipeline that executes out-of-order, instruction 2 might finish before instruction 1 reads R2. This is an example of which hazard?", "options": { "A": "RAW (Read After Write)", "B": "WAR (Write After Read)", "C": "WAW (Write After Write)", "D": "Structural" }, "correct_answer": "B" },
+            { "question_number": 19, "type": "Numerical", "topic": "Super-pipelining", "question": "A base pipeline has 5 stages and a clock cycle of 10ns. It is converted into a super-pipeline by splitting each stage into 4 smaller sub-stages. The latch overhead for the new sub-stages is 0.5ns. What is the new clock cycle time?", "correct_answer": "3.0" },
+            { "question_number": 20, "type": "Multiple Choice", "topic": "Dynamic Branch Prediction", "question": "A 2-bit saturating counter is used for dynamic branch prediction. The state is '00' (Strongly Not Taken). The branch outcomes are: T, T, T, NT. What is the final state of the counter?", "options": { "A": "01 (Weakly Not Taken)", "B": "10 (Weakly Taken)", "C": "11 (Strongly Taken)", "D": "10 (Weakly Taken)" }, "correct_answer": "B" },
+            { "question_number": 21, "type": "Numerical", "topic": "Stall Calculation with Dependencies", "question": "Consider the sequence: \nI1: R1 = R2 + R3\nI2: R4 = R1 + R5\nI3: R6 = R1 + R7\nI4: R8 = R1 + R9\nOn a 5-stage pipeline with no forwarding, how many bubbles (stalls) must be inserted between I1 and I2? Assume register write occurs in WB and read in ID.", "correct_answer": "2" },
+            { "question_number": 22, "type": "Numerical", "topic": "Multiple Issue", "question": "A 4-issue superscalar processor attempts to execute 4 instructions per cycle. In a specific benchmark, it achieves an average CPI of 0.4. What is the IPC (Instructions Per Cycle)?", "correct_answer": "2.5" },
+            { "question_number": 23, "type": "Multiple Select", "topic": "Code Size vs CPI", "question": "Compiler A produces code with IC=1000, CPI=1.2. Compiler B produces code with IC=800, CPI=1.8. The clock frequency is the same. Which statements are true?", "options": { "A": "Compiler A produces faster code.", "B": "Compiler B produces faster code.", "C": "Compiler A cycles = 1200.", "D": "Compiler B cycles = 1440." }, "correct_answer": ["A", "C", "D"] },
+            { "question_number": 24, "type": "Multiple Choice", "topic": "Hardware Complexity", "question": "To implement full forwarding in a 5-stage pipeline, inputs to the ALU in the EX stage must be selectable from:", "options": { "A": "ID/EX register only.", "B": "ID/EX, EX/MEM, and MEM/WB pipeline registers.", "C": "ID/EX and MEM/WB only.", "D": "Register File only." }, "correct_answer": "B" },
+            { "question_number": 25, "type": "Numerical", "topic": "Pipeline Filling", "question": "How many clock cycles does it take to fill a 5-stage pipeline (i.e., for the first instruction to complete its WB stage)?", "correct_answer": "5" },
+            { "question_number": 26, "type": "Multiple Choice", "topic": "Branch Prediction Buffers", "question": "A Branch Target Buffer (BTB) is accessed during which stage of a typical pipeline to reduce branch penalty to zero?", "options": { "A": "IF (Instruction Fetch)", "B": "ID (Instruction Decode)", "C": "EX (Execute)", "D": "WB (Write Back)" }, "correct_answer": "A" },
+            { "question_number": 27, "type": "Numerical", "topic": "Instruction Latency", "question": "In a pipeline with k stages and cycle time T, what is the latency of a single instruction?", "correct_answer": "k * T" },
+            { "question_number": 28, "type": "Multiple Choice", "topic": "Exceptions in Pipeline", "question": "When an exception occurs in the EX stage of instruction I, what must happen to instruction I+1 which is in the ID stage?", "options": { "A": "It continues execution normally.", "B": "It is flushed (turned into a NOP).", "C": "It is paused and resumed after the handler.", "D": "It completes before the handler starts." }, "correct_answer": "B" },
+            { "question_number": 29, "type": "Numerical", "topic": "Loop Unrolling", "question": "A loop has 5 instructions per iteration and loops 1000 times. There are 2 stall cycles per iteration due to control hazards. If we unroll the loop 4 times (put 4 iterations in 1 loop body), how many total instructions (excluding initialization) are executed approximately?", "correct_answer": "4250" },
+            { "question_number": 30, "type": "Multiple Choice", "topic": "Pipeline Power", "question": "Which factor primarily limits the depth of a pipeline (increasing k indefinitely)?", "options": { "A": "The cost of latches.", "B": "Data hazards and Latch overhead (Setup/Hold time).", "C": "Memory bandwidth.", "D": "Compiler complexity." }, "correct_answer": "B" },
+            { "question_number": 31, "type": "Numerical", "topic": "Hazard Identification", "question": "Consider the following sequence of instructions:\n1. MUL R1, R2, R3\n2. ADD R4, R1, R5\n3. SUB R6, R7, R8\n4. DIV R9, R1, R6\nHow many Read-After-Write (RAW) dependencies exist in this sequence?", "correct_answer": "3" },
+            { "question_number": 32, "type": "Numerical", "topic": "Pipeline Speedup Limit", "question": "In an ideal k-stage pipeline, what is the theoretical maximum speedup achievable over a non-pipelined processor for an infinite number of instructions?", "correct_answer": "k" },
+            { "question_number": 33, "type": "Multiple Choice", "topic": "Split-Phase Register Access", "question": "Some MIPS pipeline implementations use 'Split-Phase' register access where writes happen in the first half of the cycle and reads in the second half. How does this affect the stall count for a data dependency between an instruction in WB and one in ID?", "options": { "A": "It increases stalls by 1 cycle.", "B": "It eliminates the need for a stall in this specific case.", "C": "It requires an extra forwarding path.", "D": "It has no effect on stalls." }, "correct_answer": "B" },
+            { "question_number": 34, "type": "Numerical", "topic": "Pipeline Registers", "question": "A processor has a 32-bit architecture (Instructions and Data are 32-bit). In a 5-stage pipeline (IF, ID, EX, MEM, WB), calculate the approximate size (width in bits) of the EX/MEM pipeline register. Assume the following need to be passed: PC+4 (32 bits), Zero Flag (1 bit), ALU Result (32 bits), Store Data (32 bits), Write Register Address (5 bits), and Control Signals (4 bits).", "correct_answer": "106" },
+            { "question_number": 35, "type": "Multiple Select", "topic": "Instruction Scheduling", "question": "Which of the following are valid methods performed by a compiler to optimize pipeline performance?", "options": { "A": "Register Renaming", "B": "Filling Branch Delay Slots", "C": "Static Branch Prediction", "D": "Instruction Reordering (Scheduling)" }, "correct_answer": ["B", "C", "D"] },
+            { "question_number": 36, "type": "Numerical", "topic": "Branch Penalty", "question": "A pipeline has a clock cycle of 10ns. 30% of instructions are branches. The penalty for a taken branch is 3 cycles, and for a not-taken branch is 0 cycles (prediction is 'Not Taken'). If 40% of branches are taken, what is the average instruction execution time?", "correct_answer": "13.6" },
+            { "question_number": 37, "type": "Multiple Choice", "topic": "Data Hazards - Output Dependency", "question": "A Write-After-Write (WAW) hazard is also known as:", "options": { "A": "True Dependency", "B": "Anti Dependency", "C": "Output Dependency", "D": "Control Dependency" }, "correct_answer": "C" },
+            { "question_number": 38, "type": "Numerical", "topic": "Cycle Time Calculation", "question": "A 4-stage pipeline has stage delays of 1ns, 2ns, 3ns, and 4ns. What is the frequency of the processor in GHz?", "correct_answer": "0.25" },
+            { "question_number": 39, "type": "Numerical", "topic": "Pipeline vs Serial", "question": "A task takes 40 seconds to complete on a non-pipelined processor. If the task is split into 5 equal pipelined stages with negligible overhead, how long (in seconds) will it take to complete 100 such tasks?", "correct_answer": "832" },
+            { "question_number": 40, "type": "Multiple Choice", "topic": "Structural Hazards", "question": "In a Von Neumann architecture pipelined processor, a structural hazard is most likely to occur during:", "options": { "A": "ALU operations.", "B": "Simultaneous IF and MEM stages.", "C": "Simultaneous ID and WB stages.", "D": "Branch Target Calculation." }, "correct_answer": "B" },
+            { "question_number": 41, "type": "Numerical", "topic": "Stall Cycles with Forwarding", "question": "In a 5-stage MIPS pipeline with forwarding, how many stall cycles are needed for the sequence:\nLW R1, 100(R2)\nSW R1, 200(R3)", "correct_answer": "1" },
+            { "question_number": 42, "type": "Multiple Choice", "topic": "Exceptions", "question": "Which of the following is required to implement 'Precise Interrupts' in a pipelined processor?", "options": { "A": "Interrupts must be handled immediately when they occur.", "B": "The pipeline must complete instructions before the faulting one and discard instructions after it.", "C": "The pipeline must be flushed entirely.", "D": "All instructions currently in the pipeline must complete." }, "correct_answer": "B" },
+            { "question_number": 43, "type": "Numerical", "topic": "Throughput Formula", "question": "Calculate the throughput (instructions/sec) for a pipeline with Stage Delay = 5ns, Latch Delay = 1ns, executing a massive stream of independent instructions.", "correct_answer": "166666666.7" },
+            { "question_number": 44, "type": "Multiple Select", "topic": "Dependencies", "question": "Which of the following dependencies can cause Data Hazards?", "options": { "A": "RAW (Read After Write)", "B": "WAR (Write After Read)", "C": "WAW (Write After Write)", "D": "RAR (Read After Read)" }, "correct_answer": ["A", "B", "C"] },
+            { "question_number": 45, "type": "Multiple Choice", "topic": "MIPS Pipeline Stages", "question": "In the standard 5-stage MIPS pipeline, the branch target address is computed in which stage?", "options": { "A": "IF", "B": "ID", "C": "EX", "D": "MEM" }, "correct_answer": "B" },
+            { "question_number": 46, "type": "Numerical", "topic": "Speedup with Stalls", "question": "A 5-stage pipeline with cycle time 10ns executes a program where 20% of instructions incur 2 stall cycles each. What is the speedup over a non-pipelined processor that takes 50ns per instruction?", "correct_answer": "3.57" },
+            { "question_number": 47, "type": "Numerical", "topic": "Loop Execution Time", "question": "A loop runs 50 times. The loop body has 3 instructions. The pipeline has 5 stages. There is 1 stall per iteration. How many cycles are needed to complete the loop?", "correct_answer": "204" },
+            { "question_number": 48, "type": "Multiple Choice", "topic": "Instruction Fetch", "question": "What happens to the PC (Program Counter) in the IF stage of a pipeline?", "options": { "A": "It is decremented.", "B": "It is written to the register file.", "C": "It is used to fetch instruction and then incremented (PC + 4).", "D": "It is compared with the branch target." }, "correct_answer": "C" },
+            { "question_number": 49, "type": "Multiple Choice", "topic": "Hazard Detection Unit", "question": "The Hazard Detection Unit in a pipeline typically controls:", "options": { "A": "The selection lines of forwarding multiplexers.", "B": "PC write enable and IF/ID register write enable (to insert stalls).", "C": "The ALU operation codes.", "D": "The Write Back data selection." }, "correct_answer": "B" },
+            { "question_number": 50, "type": "Numerical", "topic": "Dynamic Branch Prediction", "question": "A branch instruction is executed 100 times. A 1-bit dynamic predictor is used, initialized to 'Taken'. The actual branch behavior is Not-Taken, Taken, Not-Taken, Taken... (alternating). What is the prediction accuracy (%)?", "correct_answer": "0" },
+            { "question_number": 51, "type": "Multiple Choice", "topic": "Register Renaming", "question": "Register Renaming is primarily used to eliminate which types of hazards?", "options": { "A": "Read After Write (RAW)", "B": "Write After Read (WAR) and Write After Write (WAW)", "C": "Control Hazards", "D": "Structural Hazards" }, "correct_answer": "B" },
+            { "question_number": 52, "type": "Numerical", "topic": "Pipeline Efficiency Calculation", "question": "A pipeline has 4 stages. The execution of a task requires 1000 instructions. Due to hazards, the pipeline is stalled 10% of the time. What is the efficiency of the pipeline?", "correct_answer": "0.909" },
+            { "question_number": 53, "type": "Numerical", "topic": "Pipeline Diagram", "question": "Consider 3 instructions: I1, I2, I3. \nI1: 5 cycles.\nI2: Depends on I1, starts after I1 completes execution stage (cycle 3).\nI3: Independent.\nIn a 5-stage pipeline, in which cycle does I3 complete WB?", "correct_answer": "7" },
+            { "question_number": 54, "type": "Multiple Choice", "topic": "Arithmetic Pipeline", "question": "In floating-point pipelines, which stage is typically NOT present in integer pipelines?", "options": { "A": "Instruction Fetch", "B": "Mantissa Alignment / Normalization", "C": "Operand Fetch", "D": "Write Back" }, "correct_answer": "B" },
+            { "question_number": 55, "type": "Numerical", "topic": "Speedup vs Stages", "question": "If a processor logic is divided into 10 stages (perfect balance) instead of 5, and latch overhead is 0, by what factor does the throughput increase?", "correct_answer": "2" },
+            { "question_number": 56, "type": "Multiple Choice", "topic": "Branch Prediction Strategy", "question": "Which branch prediction scheme is easiest for the compiler to implement without hardware support?", "options": { "A": "Branch History Table", "B": "Correlating Predictor", "C": "Static 'Always Taken' or 'Always Not Taken'", "D": "Tournament Predictor" }, "correct_answer": "C" },
+            { "question_number": 57, "type": "Numerical", "topic": "Control Hazards", "question": "A pipeline has a branch penalty of 2 cycles. 20% of instructions are branches. We use a mechanism that reduces the penalty to 1 cycle for 60% of branches, but remains 2 cycles for the rest. What is the new average stall cycles per instruction?", "correct_answer": "0.28" },
+            { "question_number": 58, "type": "Multiple Choice", "topic": "Operand Forwarding", "question": "Forwarding (Bypassing) helps in resolving hazards by:", "options": { "A": "Stalling the pipeline until data is written.", "B": "Moving data directly from a pipeline latch to the ALU input.", "C": "Reordering instructions in the compiler.", "D": "Using separate instruction and data caches." }, "correct_answer": "B" },
+            { "question_number": 59, "type": "Numerical", "topic": "Cache Miss Impact", "question": "A pipeline has an ideal CPI of 1. Instruction cache miss rate is 5%, Data cache miss rate is 10%. Miss penalty is 50 cycles. 30% of instructions are Load/Store. What is the total CPI?", "correct_answer": "5.0" },
+            { "question_number": 60, "type": "Numerical", "topic": "Throughput with Latch Delay", "question": "A non-pipelined system takes 100ns. It is pipelined into 5 stages of 20ns each. Latch delay is 2ns. What is the percentage increase in instruction execution LATENCY (not throughput) for a single instruction?", "correct_answer": "10" },
+            { "question_number": 61, "type": "Numerical", "topic": "Pipeline Efficiency", "question": "A 5-stage pipeline has a clock cycle time of 20 ns. The respective non-pipelined processor takes 80 ns to execute the same instruction. If there are no stalls, what is the speedup ratio?", "correct_answer": "4.0" },
+            { "question_number": 62, "type": "Numerical", "topic": "Hazard Stalls", "question": "Instruction sequence: \nI1: MUL R1, R2, R3 (Ex stage takes 4 cycles) \nI2: ADD R4, R1, R5 \nI3: SUB R6, R4, R1 \nIf the pipeline is standard 5-stage (IF, ID, EX, MEM, WB) but the multiplier takes 4 EX cycles (EX1, EX2, EX3, EX4), how many stall cycles are needed for I2?", "correct_answer": "3" },
+            { "question_number": 63, "type": "Multiple Choice", "topic": "Branch Prediction", "question": "Which of the following branch predictors uses a saturation counter?", "options": { "A": "1-bit dynamic predictor", "B": "2-bit dynamic predictor", "C": "Static predictor", "D": "Always Taken predictor" }, "correct_answer": "B" },
+            { "question_number": 64, "type": "Multiple Choice", "topic": "Structural Hazard", "question": "If a processor has only one write port to the register file, and both the WB stage (standard instruction) and the MEM stage (auto-increment addressing mode) try to write to a register in the same cycle, what occurs?", "options": { "A": "Data Hazard", "B": "Structural Hazard", "C": "Control Hazard", "D": "Cache Miss" }, "correct_answer": "B" },
+            { "question_number": 65, "type": "Numerical", "topic": "Pipeline Depth Limit", "question": "A processor has a total logic delay of 4000 ps. The latch setup/propagation delay is 100 ps. What is the maximum number of pipeline stages possible before the pipeline actually becomes slower than the non-pipelined version (or speedup < 1)?", "correct_answer": "40" },
+            { "question_number": 66, "type": "Multiple Choice", "topic": "MIPS Pipeline Data Paths", "question": "In the ID stage of a MIPS pipeline, which of the following actions is NOT performed?", "options": { "A": "Decode instruction", "B": "Read register values", "C": "Sign-extend immediate value", "D": "Calculate memory address" }, "correct_answer": "D" },
+            { "question_number": 67, "type": "Numerical", "topic": "Throughput Analysis", "question": "A pipeline has 6 stages. Stage delays are: 3ns, 4ns, 2ns, 5ns, 3ns, 2ns. Buffer delay is 1ns. What is the max throughput (in Millions of Instructions Per Second)?", "correct_answer": "166.67" },
+            { "question_number": 68, "type": "Multiple Choice", "topic": "Control Hazards", "question": "The 'Branch Delay Slot' is an architectural feature where:", "options": { "A": "The processor automatically inserts a NOP after a branch.", "B": "The instruction following the branch is executed regardless of the branch outcome.", "C": "The hardware pauses fetch until the branch is resolved.", "D": "The branch target is prefetched into a buffer." }, "correct_answer": "B" },
+            { "question_number": 69, "type": "Numerical", "topic": "Speedup with Hazards", "question": "Ideal CPI = 1. Pipeline depth = 5. \n20% Loads (2 stall cycles if used immediately, 50% are used immediately). \n20% Branches (1 stall cycle). \nWhat is the speedup vs a non-pipelined machine (assume non-pipe CPI = 5)?", "correct_answer": "3.57" },
+            { "question_number": 70, "type": "Multiple Select", "topic": "Resource Conflicts", "question": "Which of the following scenarios in a pipeline leads to a stall due to resource conflict?", "options": { "A": "IF and MEM stages accessing the same cache.", "B": "ID and WB stages accessing the Register File.", "C": "Two instructions needing the ALU in the same cycle.", "D": "RAW dependency between adjacent instructions." }, "correct_answer": ["A", "B", "C"] },
+            { "question_number": 71, "type": "Numerical", "topic": "Throughput Calculation", "question": "1000 instructions are executed. 5-stage pipeline. Cycle time 10ns. No hazards. What is total execution time in microseconds?", "correct_answer": "10.04" },
+            { "question_number": 72, "type": "Multiple Choice", "topic": "Control Dependencies", "question": "Which hardware mechanism is used to reduce the penalty of control hazards by guessing the outcome?", "options": { "A": "Branch Target Buffer (BTB)", "B": "Branch Prediction", "C": "Speculative Execution", "D": "All of the above" }, "correct_answer": "D" },
+            { "question_number": 73, "type": "Numerical", "topic": "Superpipelining", "question": "A pipeline is 'Superpipelined' with depth 20. Cycle time is 0.5ns. What is the pipeline latency for one instruction?", "correct_answer": "10" },
+            { "question_number": 74, "type": "Multiple Choice", "topic": "Hazard Elimination", "question": "Which hazard CANNOT be eliminated solely by Operand Forwarding?", "options": { "A": "ALU to ALU dependency (ADD followed by SUB)", "B": "Load to ALU dependency (LW followed by ADD using loaded value)", "C": "ALU to Store dependency", "D": "Store to Load dependency" }, "correct_answer": "B" },
+            { "question_number": 75, "type": "Numerical", "topic": "Pipeline Speedup", "question": "If a pipeline has k stages and the number of instructions N is very large (infinite), the speedup approaches:", "correct_answer": "k" },
+            { "question_number": 76, "type": "Multiple Choice", "topic": "Instruction Cycle", "question": "In a 5-stage pipeline, if an instruction is in the MEM stage, where is the instruction that was fetched immediately after it?", "options": { "A": "IF", "B": "ID", "C": "EX", "D": "WB" }, "correct_answer": "C" },
+            { "question_number": 77, "type": "Numerical", "topic": "Stall Calculation", "question": "Sequence: \nLW R1, 0(R2)\nADD R3, R1, R4\nSUB R5, R3, R6\nWith forwarding, how many bubbles total?", "correct_answer": "1" },
+            { "question_number": 78, "type": "Numerical", "topic": "Branch Prediction Accuracy", "question": "A code segment has 20% branches. The processor has a branch penalty of 3 cycles. Branch prediction accuracy is 90%. What is the average CPI contribution from branch stalls?", "correct_answer": "0.06" },
+            { "question_number": 79, "type": "Multiple Choice", "topic": "Pipeline Registers", "question": "Why are pipeline registers (latches) necessary between stages?", "options": { "A": "To increase the clock frequency indefinitely.", "B": "To separate the stages so they can operate on different instructions simultaneously.", "C": "To eliminate data hazards.", "D": "To store the entire program." }, "correct_answer": "B" },
+            { "question_number": 80, "type": "Numerical", "topic": "CPI calculation", "question": "A processor has a CPI of 1.5 without cache misses. The I-Cache miss rate is 2% and D-Cache miss rate is 5%. Miss penalty is 100 cycles. 20% of instructions are loads/stores. What is the effective CPI?", "correct_answer": "4.5" },
+            { "question_number": 81, "type": "Numerical", "topic": "MIPS Coding", "question": "How many NOPs must be inserted between 'LW R1, 0(R2)' and 'SW R1, 0(R3)' to avoid hazards in a MIPS pipeline WITHOUT forwarding?", "correct_answer": "2" },
+            { "question_number": 82, "type": "Multiple Choice", "topic": "Register File Ports", "question": "A 5-stage pipelined processor requires the register file to support:", "options": { "A": "1 Read port and 1 Write port.", "B": "2 Read ports and 1 Write port.", "C": "1 Read port and 2 Write ports.", "D": "2 Read ports and 2 Write ports." }, "correct_answer": "B" },
+            { "question_number": 83, "type": "Numerical", "topic": "Pipeline Throughput", "question": "A pipelined processor runs at 1 GHz. The average CPI is 1.2. What is the throughput in MIPS?", "correct_answer": "833.33" },
+            { "question_number": 84, "type": "Multiple Select", "topic": "Write Policy", "question": "Which of the following pipeline stages writes to the Register File in a standard RISC pipeline?", "options": { "A": "ID", "B": "EX", "C": "MEM", "D": "WB" }, "correct_answer": ["D"] },
+            { "question_number": 85, "type": "Numerical", "topic": "Stage Imbalance", "question": "Stages: 10ns, 15ns, 40ns, 15ns, 10ns. What is the percentage of time the IF stage (10ns) is idle in each clock cycle?", "correct_answer": "75" },
+            { "question_number": 86, "type": "Multiple Choice", "topic": "Data Hazard Logic", "question": "In a pipeline with forwarding, if both the EX/MEM pipeline register and the MEM/WB pipeline register contain data that matches the source register of the current instruction in the EX stage, which one should be forwarded?", "options": { "A": "EX/MEM (Most recent)", "B": "MEM/WB (Oldest)", "C": "Both are ORed together", "D": "Pipeline stall is required" }, "correct_answer": "A" },
+            { "question_number": 87, "type": "Numerical", "topic": "Pipeline Fill Time", "question": "For a 20-stage pipeline running at 2 GHz, how long (in ns) does it take from the start of the first instruction fetch until the pipeline is full?", "correct_answer": "10" },
+            { "question_number": 88, "type": "Multiple Choice", "topic": "Control Hazard Solution", "question": "Replacing a conditional branch with a conditional move instruction (predication) is a technique to eliminate:", "options": { "A": "Data Hazards", "B": "Control Hazards", "C": "Structural Hazards", "D": "Memory Latency" }, "correct_answer": "B" },
+            { "question_number": 89, "type": "Numerical", "topic": "Stall Cycles", "question": "A program has 1000 instructions. 10% are branches. Branch penalty is 2 stall cycles. There are no other hazards. How many total cycles to execute?", "correct_answer": "1204" },
+            { "question_number": 90, "type": "Multiple Choice", "topic": "Speedup Limits", "question": "According to Amdahl's Law, if 10% of a program's execution is not pipelinable, the maximum theoretical speedup is limited to:", "options": { "A": "5x", "B": "10x", "C": "20x", "D": "100x" }, "correct_answer": "B" },
+            { "question_number": 91, "type": "Numerical", "topic": "Pipeline Bandwidth", "question": "A memory system can deliver 1 word every 10ns. The processor has a 5ns cycle time. If the fetch unit needs 1 word per cycle, what is the effective CPI ignoring other hazards?", "correct_answer": "2" },
+            { "question_number": 92, "type": "Multiple Choice", "topic": "Instruction Set Architecture", "question": "Which ISA characteristic simplifies pipelining the most?", "options": { "A": "Variable instruction length", "B": "Complex addressing modes", "C": "Fixed instruction length", "D": "Memory-to-Memory operations" }, "correct_answer": "C" },
+            { "question_number": 93, "type": "Numerical", "topic": "Throughput with Branching", "question": "Processor P1: 5 stages, 1GHz, Branch penalty 2 cycles. \nProcessor P2: 8 stages, 1.5GHz, Branch penalty 4 cycles. \nInstruction mix: 20% branches. Which processor has higher throughput (MIPS)?", "correct_answer": "833" },
+            { "question_number": 94, "type": "Multiple Choice", "topic": "Pipeline Reset", "question": "Flushing the pipeline (clearing all instructions) is typically required when:", "options": { "A": "A Read-After-Write hazard is detected.", "B": "A branch is mispredicted.", "C": "The register file is full.", "D": "An integer overflow occurs (ignored)." }, "correct_answer": "B" },
+            { "question_number": 95, "type": "Numerical", "topic": "Throughput Efficiency", "question": "Calculate the efficiency of a 5-stage pipeline with 100 instructions and 0 stalls.", "correct_answer": "0.961" },
+            { "question_number": 96, "type": "Multiple Choice", "topic": "Pipeline Bubble", "question": "Inserting a 'Bubble' into the pipeline is equivalent to:", "options": { "A": "Halting the clock.", "B": "Issuing a NOP (No Operation) instruction.", "C": "Increasing the clock frequency.", "D": "Skipping a stage." }, "correct_answer": "B" },
+            { "question_number": 97, "type": "Numerical", "topic": "Hazard Frequency", "question": "A program contains 20% Load instructions. 40% of Loads are followed immediately by an instruction using the loaded value (Load-Use). The pipeline has full forwarding but requires 1 stall for Load-Use. What is the CPI increase due to these hazards?", "correct_answer": "0.08" },
+            { "question_number": 98, "type": "Multiple Select", "topic": "Memory Access", "question": "Separate Instruction and Data Caches (Harvard Architecture) are used in pipelining to avoid:", "options": { "A": "Data Hazards", "B": "Structural Hazards", "C": "Control Hazards", "D": "WAR Hazards" }, "correct_answer": ["B"] },
+            { "question_number": 99, "type": "Numerical", "topic": "Pipeline Clock Skew", "question": "Max stage delay = 5ns. Latch delay = 0.5ns. Clock Skew = 0.2ns. What is the minimum clock cycle time?", "correct_answer": "5.7" },
+            { "question_number": 100, "type": "Numerical", "topic": "Instruction Count Calculation", "question": "A benchmark takes 10 seconds to execute on a 1 GHz processor with a CPI of 2. How many instructions are in the benchmark?", "correct_answer": "5000000000" }
+];
+    let currentQuestions = [];
+
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+
+    function initQuiz() {
+        document.getElementById('quiz-view').style.display = 'block';
+        document.getElementById('result-view').style.display = 'none';
+        window.scrollTo(0,0);
+        
+        currentQuestions = shuffle([...allQuestions]).slice(0, 10);
+        
+        const container = document.getElementById('questions-container');
+        container.innerHTML = '';
+
+        currentQuestions.forEach((q, index) => {
+            const block = document.createElement('div');
+            block.className = 'question-block';
+            block.id = `block-${index}`;
+
+            let inputHTML = '';
+            if (q.type === "Numerical") {
+                inputHTML = `<input type="text" class="numerical-input" placeholder="Enter numerical value" data-idx="${index}">`;
+            } else if (q.type === "Multiple Choice") {
+                inputHTML = '<div class="options-grid">';
+                for (let key in q.options) {
+                    inputHTML += `
+                        <label class="option-label">
+                            <input type="radio" name="q-${index}" value="${key}" data-idx="${index}">
+                            ${key}: ${q.options[key]}
+                        </label>`;
+                }
+                inputHTML += '</div>';
+            } else if (q.type === "Multiple Select") {
+                inputHTML = '<div class="options-grid">';
+                for (let key in q.options) {
+                    inputHTML += `
+                        <label class="option-label">
+                            <input type="checkbox" name="q-${index}" value="${key}" data-idx="${index}">
+                            ${key}: ${q.options[key]}
+                        </label>`;
+                }
+                inputHTML += '</div>';
+            }
+
+            block.innerHTML = `
+                <div class="question-header">
+                    <div class="header-left">
+                        <span class="meta">Question ${index + 1}</span>
+                        <span class="topic-badge">${q.topic}</span>
+                    </div>
+                </div>
+                <div class="question-text">${q.question}</div>
+                ${inputHTML}
+                <div id="feedback-${index}" class="feedback hidden"></div>
+            `;
+            container.appendChild(block);
+        });
+    }
+
+    function submitQuiz() {
+        let score = 0;
+        const summary = document.getElementById('results-summary');
+        summary.innerHTML = '';
+
+        currentQuestions.forEach((q, index) => {
+            let isCorrect = false;
+            let userAnswer = "";
+
+            if (q.type === "Numerical") {
+                const input = document.querySelector(`input[data-idx="${index}"]`);
+                userAnswer = input.value.trim().toLowerCase();
+                isCorrect = userAnswer === q.correct_answer.toLowerCase();
+            } else if (q.type === "Multiple Choice") {
+                const selected = document.querySelector(`input[name="q-${index}"]:checked`);
+                userAnswer = selected ? selected.value : "";
+                isCorrect = userAnswer === q.correct_answer;
+            } else if (q.type === "Multiple Select") {
+                const checked = Array.from(document.querySelectorAll(`input[name="q-${index}"]:checked`)).map(el => el.value);
+                userAnswer = checked;
+                isCorrect = checked.length === q.correct_answer.length && 
+                            checked.every(v => q.correct_answer.includes(v));
+            }
+
+            if (isCorrect) score++;
+
+            const resultBlock = document.getElementById(`block-${index}`).cloneNode(true);
+            const header = resultBlock.querySelector('.question-header');
+            
+            // Format Copy Text including Options
+            let textToCopy = q.question;
+            if (q.options && Object.keys(q.options).length > 0) {
+                textToCopy += "\n\nOptions:";
+                for (let key in q.options) {
+                    textToCopy += `\n${key}: ${q.options[key]}`;
+                }
+            }
+            textToCopy += `\n\nCorrect Answer: ${formatAnswer(q.correct_answer)}`;
+
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy Context
+            `;
+            copyBtn.onclick = () => copyToClipboard(textToCopy);
+            header.appendChild(copyBtn);
+
+            const feedback = resultBlock.querySelector('.feedback');
+            feedback.classList.remove('hidden');
+            
+            if (isCorrect) {
+                feedback.classList.add('correct');
+                feedback.innerHTML = `Correct! Your answer: ${formatAnswer(userAnswer)}`;
+            } else {
+                feedback.classList.add('incorrect');
+                feedback.innerHTML = `Incorrect. Your answer: ${formatAnswer(userAnswer)}
+                    <span class="correct-answer-text">Correct Answer: ${formatAnswer(q.correct_answer)}</span>`;
+            }
+            
+            summary.appendChild(resultBlock);
+        });
+
+        document.getElementById('final-score').innerText = `${score}/10`;
+        
+        let comment = "Keep practicing!";
+        if (score === 10) comment = "Perfect! You are a master!";
+        else if (score >= 8) comment = "Excellent understanding!";
+        else if (score >= 5) comment = "Good effort, but room for improvement.";
+        document.getElementById('score-comment').innerText = comment;
+
+        document.getElementById('quiz-view').style.display = 'none';
+        document.getElementById('result-view').style.display = 'block';
+        window.scrollTo(0,0);
+    }
+
+    function formatAnswer(ans) {
+        if (Array.isArray(ans)) return ans.sort().join(", ") || "None";
+        return ans || "No answer";
+    }
+
+    function copyToClipboard(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            showToast();
+        } catch (err) {
+            console.error('Unable to copy', err);
+        }
+        document.body.removeChild(textArea);
+    }
+
+    function showToast() {
+        const toast = document.getElementById("toast");
+        toast.className = "show";
+        setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+
+    window.onload = initQuiz;
+</script>
+
+</body>
+</html>
