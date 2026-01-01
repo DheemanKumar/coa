@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Computer Architecture - Pipelining Quiz</title>
+    <title>Theory of Computation - Regular Expressions Quiz</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -224,8 +224,8 @@
 
 <div class="container">
     <header>
-        <h1>Pipelining Master</h1>
-        <p class="meta">10 Random Questions | Computer Architecture & Organization</p>
+        <h1>Regular Expressions Master</h1>
+        <p class="meta">10 Random Questions | Theory of Computation</p>
     </header>
 
     <div id="quiz-view">
@@ -250,9 +250,8 @@
 
 <div id="toast">Question and options copied!</div>
 
-<script src="questions/pipelining.js"></script>
+<script src="questions/regular_expression.js"></script>
 <script>
-    const allQuestions = pipeliningQuestions;
     let currentQuestions = [];
 
     function shuffle(array) {
@@ -279,21 +278,21 @@
                 inputHTML = `<input type="text" class="numerical-input" placeholder="Enter numerical value" data-idx="${index}">`;
             } else if (q.type === "Multiple Choice") {
                 inputHTML = '<div class="options-grid">';
-                for (let key in q.options) {
+                for (let key in q.content.options) {
                     inputHTML += `
                         <label class="option-label">
                             <input type="radio" name="q-${index}" value="${key}" data-idx="${index}">
-                            ${key}: ${q.options[key]}
+                            ${key}: ${q.content.options[key]}
                         </label>`;
                 }
                 inputHTML += '</div>';
             } else if (q.type === "Multiple Select") {
                 inputHTML = '<div class="options-grid">';
-                for (let key in q.options) {
+                for (let key in q.content.options) {
                     inputHTML += `
                         <label class="option-label">
                             <input type="checkbox" name="q-${index}" value="${key}" data-idx="${index}">
-                            ${key}: ${q.options[key]}
+                            ${key}: ${q.content.options[key]}
                         </label>`;
                 }
                 inputHTML += '</div>';
@@ -306,7 +305,7 @@
                         <span class="topic-badge">${q.topic}</span>
                     </div>
                 </div>
-                <div class="question-text">${q.question}</div>
+                <div class="question-text">${q.content.question}</div>
                 ${inputHTML}
                 <div id="feedback-${index}" class="feedback hidden"></div>
             `;
@@ -326,16 +325,16 @@
             if (q.type === "Numerical") {
                 const input = document.querySelector(`input[data-idx="${index}"]`);
                 userAnswer = input.value.trim().toLowerCase();
-                isCorrect = userAnswer === q.correct_answer.toLowerCase();
+                isCorrect = userAnswer === q.answer.toLowerCase();
             } else if (q.type === "Multiple Choice") {
                 const selected = document.querySelector(`input[name="q-${index}"]:checked`);
                 userAnswer = selected ? selected.value : "";
-                isCorrect = userAnswer === q.correct_answer;
+                isCorrect = userAnswer === q.answer;
             } else if (q.type === "Multiple Select") {
                 const checked = Array.from(document.querySelectorAll(`input[name="q-${index}"]:checked`)).map(el => el.value);
                 userAnswer = checked;
-                isCorrect = checked.length === q.correct_answer.length && 
-                            checked.every(v => q.correct_answer.includes(v));
+                isCorrect = checked.length === q.answer.length && 
+                            checked.every(v => q.answer.includes(v));
             }
 
             if (isCorrect) score++;
@@ -344,14 +343,14 @@
             const header = resultBlock.querySelector('.question-header');
             
             // Format Copy Text including Options
-            let textToCopy = q.question;
-            if (q.options && Object.keys(q.options).length > 0) {
+            let textToCopy = q.content.question;
+            if (q.content.options && Object.keys(q.content.options).length > 0) {
                 textToCopy += "\n\nOptions:";
-                for (let key in q.options) {
-                    textToCopy += `\n${key}: ${q.options[key]}`;
+                for (let key in q.content.options) {
+                    textToCopy += `\n${key}: ${q.content.options[key]}`;
                 }
             }
-            textToCopy += `\n\nCorrect Answer: ${formatAnswer(q.correct_answer)}`;
+            textToCopy += `\n\nCorrect Answer: ${formatAnswer(q.answer)}`;
 
             const copyBtn = document.createElement('button');
             copyBtn.className = 'copy-btn';
@@ -371,7 +370,7 @@
             } else {
                 feedback.classList.add('incorrect');
                 feedback.innerHTML = `Incorrect. Your answer: ${formatAnswer(userAnswer)}
-                    <span class="correct-answer-text">Correct Answer: ${formatAnswer(q.correct_answer)}</span>`;
+                    <span class="correct-answer-text">Correct Answer: ${formatAnswer(q.answer)}</span>`;
             }
             
             summary.appendChild(resultBlock);

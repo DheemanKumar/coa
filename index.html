@@ -8,26 +8,93 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f8fafc; color:#1e293b; margin:0; }
         .wrap { max-width:900px; margin:80px auto; background:#fff; padding:32px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.06); }
         h1 { color:#2563eb; margin:0 0 8px; }
-        p { color:#64748b; }
-        .links { margin-top:20px; }
-        .links a { display:inline-block; margin:6px 10px 6px 0; padding:10px 16px; background:#2563eb; color:#fff; text-decoration:none; border-radius:6px; }
-        .links a.secondary { background:#e2e8f0; color:#1e293b; }
-        footer { margin-top:24px; color:#94a3b8; font-size:0.9rem; }
+        p { color:#64748b; margin-bottom: 25px; }
+
+        .main-sections { margin-top:20px; }
+        .section-details {
+            background:#f0f4f8;
+            border-radius:8px;
+            margin-bottom:15px;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.2s ease-in-out;
+        }
+        .section-details[open] {
+            background:#e6eef7;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .section-summary {
+            font-size:1.2rem;
+            font-weight:600;
+            color:#2563eb;
+            cursor:pointer;
+            outline:none;
+            display:flex;
+            align-items:center;
+        }
+        .section-summary::-webkit-details-marker { display:none; }
+        .section-summary::before {
+            content:'';
+            display:inline-block;
+            width:10px;
+            height:10px;
+            border-right:2px solid #2563eb;
+            border-bottom:2px solid #2563eb;
+            transform:rotate(-45deg);
+            margin-right:10px;
+            transition:transform 0.2s ease-in-out;
+        }
+        .section-details[open] .section-summary::before { transform:rotate(45deg); }
+
+        .section-content {
+            padding-top:15px;
+            border-top:1px solid #d1d9e2;
+            margin-top:15px;
+        }
+        .section-content a {
+            display:block;
+            margin:8px 0;
+            padding:10px 15px;
+            background:#f8fbfc;
+            color:#2563eb;
+            text-decoration:none;
+            border-radius:6px;
+            border:1px solid #cfe6ff;
+            transition:background 0.2s, transform 0.2s;
+        }
+        .section-content a:hover {
+            background:#e0edff;
+            transform:translateX(5px);
+        }
+
+        footer { margin-top:24px; color:#94a3b8; font-size:0.9rem; text-align: center;}
     </style>
 </head>
 <body>
     <div class="wrap">
-        <h1>Computer Architecture & Organization</h1>
+        <h1>General Quiz</h1>
         <p>Welcome — pick a learning module below.</p>
 
-        <div class="links">
-            <a href="cashing.html">Caching Quiz</a>
-            <a href="pipelining.html">Pipelining Quiz</a>
+        <div class="main-sections">
+            <details class="section-details" open>
+                <summary class="section-summary">COA (Computer Architecture & Organization)</summary>
+                <div class="section-content">
+                    <a href="coa.html">General COA Quiz</a>
+                    <a href="cashing.html">Caching Quiz</a>
+                    <a href="pipelining.html">Pipelining Quiz</a>
+                </div>
+            </details>
+
+            <details class="section-details">
+                <summary class="section-summary">Theory of Computation (TOC)</summary>
+                <div class="section-content">
+                    <a href="regular_expression.html">Regular Expressions Quiz</a>
+                </div>
+            </details>
         </div>
 
         <footer>
-            <div>Project: COA</div>
-            <div>Files: <a href="cashing.html">cashing.html</a> | <a href="pipelining.html">pipelining.html</a></div>
+            <div>Project: COA & TOC Quizzes</div>
         </footer>
     </div>
 </body>
