@@ -222,72 +222,6 @@
 </head>
 <body>
 
-.btn-secondary { background: var(--secondary); color: white; }
-
-        /* Results Styles */
-        .result-view { display: none; }
-        
-        .score-board {
-            text-align: center;
-            padding: 2rem;
-            background: #f1f5f9;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
-
-        .score-val {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        .feedback {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .feedback.correct { background: #dcfce7; color: #166534; border-left: 4px solid var(--success); }
-        .feedback.incorrect { background: #fee2e2; color: #991b1b; border-left: 4px solid var(--danger); }
-
-        .correct-answer-text {
-            font-weight: bold;
-            display: block;
-            margin-top: 5px;
-        }
-
-        .hidden { display: none; }
-
-        /* Toast Notification */
-        #toast {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: #1e293b;
-            color: #fff;
-            text-align: center;
-            border-radius: 8px;
-            padding: 14px;
-            position: fixed;
-            z-index: 1000;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            font-size: 0.95rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        #toast.show {
-            visibility: visible;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
-
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-    </style>
-</head>
-<body>
-
 <div class="container">
     <header>
         <h1>Pipelining Master</h1>
@@ -341,7 +275,59 @@
         currentQuestions = shuffle([...allQuestions]).slice(0, 10);
         document.getElementById('quiz-meta').innerText = `${oneQuestionMode ? '1 Question at a time' : '10 Random Questions'} | Computer Architecture & Organization`;
         
-        renderQuestion();
+        if (oneQuestionMode) {
+            renderQuestion();
+        } else {
+            renderAllQuestions();
+        }
+    }
+
+    function renderAllQuestions() {
+        const container = document.getElementById('questions-container');
+        container.innerHTML = '';
+        currentQuestions.forEach((q, index) => {
+            const block = document.createElement('div');
+            block.className = 'question-block';
+            block.id = `block-${index}`;
+
+            let inputHTML = '';
+            if (q.type === "Numerical") {
+                inputHTML = `<input type="text" class="numerical-input" placeholder="Enter numerical value" data-idx="${index}">`;
+            } else if (q.type === "Multiple Choice") {
+                inputHTML = '<div class="options-grid">';
+                for (let key in q.options) {
+                    inputHTML += `
+                        <label class="option-label">
+                            <input type="radio" name="q-${index}" value="${key}" data-idx="${index}">
+                            ${key}: ${q.options[key]}
+                        </label>`;
+                }
+                inputHTML += '</div>';
+            } else if (q.type === "Multiple Select") {
+                inputHTML = '<div class="options-grid">';
+                for (let key in q.options) {
+                    inputHTML += `
+                        <label class="option-label">
+                            <input type="checkbox" name="q-${index}" value="${key}" data-idx="${index}">
+                            ${key}: ${q.options[key]}
+                        </label>`;
+                }
+                inputHTML += '</div>';
+            }
+
+            block.innerHTML = `
+                <div class="question-header">
+                    <div class="header-left">
+                        <span class="meta">Question ${index + 1}</span>
+                        <span class="topic-badge">${q.topic}</span>
+                    </div>
+                </div>
+                <div class="question-text">${q.question}</div>
+                ${inputHTML}
+                <div id="feedback-${index}" class="feedback hidden"></div>
+            `;
+            container.appendChild(block);
+        });
     }
 
     function renderQuestion() {
@@ -449,18 +435,26 @@
         `;
         copyBtn.onclick = () => copyToClipboard(textToCopy);
         header.appendChild(copyBtn);
-        
-        document.getElementById('submit-btn').disabled = true;
 
-        setTimeout(() => {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < currentQuestions.length) {
-                renderQuestion();
-                document.getElementById('submit-btn').disabled = false;
-            } else {
-                showFinalScore();
-            }
-        }, 2000);
+        document.getElementById('submit-btn').style.display = 'none';
+
+        const footer = document.querySelector('.footer-actions');
+        const nextButton = document.createElement('button');
+        nextButton.className = 'btn btn-primary';
+        nextButton.innerText = 'Next';
+        nextButton.onclick = () => showNextQuestion();
+        footer.appendChild(nextButton);
+    }
+
+    function showNextQuestion() {
+        currentQuestionIndex++;
+        const footer = document.querySelector('.footer-actions');
+        footer.innerHTML = '<button id="submit-btn" class="btn btn-primary" onclick="submitQuiz()">Submit</button>';
+        if (currentQuestionIndex < currentQuestions.length) {
+            renderQuestion();
+        } else {
+            showFinalScore();
+        }
     }
 
     function showFullResults() {

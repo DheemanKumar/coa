@@ -349,33 +349,269 @@
         
             function initQuiz() {
         
-                oneQuestionMode = localStorage.getItem('oneQuestionMode') === 'true';
         
-                currentQuestionIndex = 0;
         
-                score = 0;
+                    oneQuestionMode = localStorage.getItem('oneQuestionMode') === 'true';
         
         
         
-                document.getElementById('quiz-view').style.display = 'block';
+                    currentQuestionIndex = 0;
         
-                document.getElementById('result-view').style.display = 'none';
         
-                document.getElementById('submit-btn').innerText = oneQuestionMode ? 'Submit' : 'Submit Answers';
         
-                window.scrollTo(0,0);
+                    score = 0;
         
-                
         
-                currentQuestions = shuffle([...allQuestions]).slice(0, 10);
         
-                document.getElementById('quiz-meta').innerText = `${oneQuestionMode ? '1 Question at a time' : '10 Random Questions'} | Computer Architecture & Organization`;
+            
         
-                
         
-                renderQuestion();
         
-            }
+                    document.getElementById('quiz-view').style.display = 'block';
+        
+        
+        
+                    document.getElementById('result-view').style.display = 'none';
+        
+        
+        
+                    document.getElementById('submit-btn').innerText = oneQuestionMode ? 'Submit' : 'Submit Answers';
+        
+        
+        
+                    window.scrollTo(0,0);
+        
+        
+        
+                    
+        
+        
+        
+                    currentQuestions = shuffle([...allQuestions]).slice(0, 10);
+        
+        
+        
+                    document.getElementById('quiz-meta').innerText = `${oneQuestionMode ? '1 Question at a time' : '10 Random Questions'} | Computer Architecture & Organization`;
+        
+        
+        
+                    
+        
+        
+        
+                    if (oneQuestionMode) {
+        
+        
+        
+                        renderQuestion();
+        
+        
+        
+                    } else {
+        
+        
+        
+                        renderAllQuestions();
+        
+        
+        
+                    }
+        
+        
+        
+                }
+        
+        
+        
+            
+        
+        
+        
+                function renderAllQuestions() {
+        
+        
+        
+                    const container = document.getElementById('questions-container');
+        
+        
+        
+                    container.innerHTML = '';
+        
+        
+        
+                    currentQuestions.forEach((q, index) => {
+        
+        
+        
+                        const block = document.createElement('div');
+        
+        
+        
+                        block.className = 'question-block';
+        
+        
+        
+                        block.id = `block-${index}`;
+        
+        
+        
+            
+        
+        
+        
+                        let inputHTML = '';
+        
+        
+        
+                        if (q.type === "Numerical") {
+        
+        
+        
+                            inputHTML = `<input type="text" class="numerical-input" placeholder="Enter numerical value" data-idx="${index}">`;
+        
+        
+        
+                        } else if (q.type === "Multiple Choice") {
+        
+        
+        
+                            inputHTML = '<div class="options-grid">';
+        
+        
+        
+                            for (let key in q.options) {
+        
+        
+        
+                                inputHTML += `
+        
+        
+        
+                                    <label class="option-label">
+        
+        
+        
+                                        <input type="radio" name="q-${index}" value="${key}" data-idx="${index}">
+        
+        
+        
+                                        ${key}: ${q.options[key]}
+        
+        
+        
+                                    </label>`;
+        
+        
+        
+                            }
+        
+        
+        
+                            inputHTML += '</div>';
+        
+        
+        
+                        } else if (q.type === "Multiple Select") {
+        
+        
+        
+                            inputHTML = '<div class="options-grid">';
+        
+        
+        
+                            for (let key in q.options) {
+        
+        
+        
+                                inputHTML += `
+        
+        
+        
+                                    <label class="option-label">
+        
+        
+        
+                                        <input type="checkbox" name="q-${index}" value="${key}" data-idx="${index}">
+        
+        
+        
+                                        ${key}: ${q.options[key]}
+        
+        
+        
+                                    </label>`;
+        
+        
+        
+                            }
+        
+        
+        
+                            inputHTML += '</div>';
+        
+        
+        
+                        }
+        
+        
+        
+            
+        
+        
+        
+                        block.innerHTML = `
+        
+        
+        
+                            <div class="question-header">
+        
+        
+        
+                                <div class="header-left">
+        
+        
+        
+                                    <span class="meta">Question ${index + 1}</span>
+        
+        
+        
+                                    <span class="topic-badge">${q.topic}</span>
+        
+        
+        
+                                </div>
+        
+        
+        
+                            </div>
+        
+        
+        
+                            <div class="question-text">${q.question}</div>
+        
+        
+        
+                            ${inputHTML}
+        
+        
+        
+                            <div id="feedback-${index}" class="feedback hidden"></div>
+        
+        
+        
+                        `;
+        
+        
+        
+                        container.appendChild(block);
+        
+        
+        
+                    });
+        
+        
+        
+                }
         
         
         
@@ -689,7 +925,7 @@
         
         
         
-                    document.getElementById('submit-btn').disabled = true;
+                    document.getElementById('submit-btn').style.display = 'none';
         
         
         
@@ -697,39 +933,71 @@
         
         
         
-                    setTimeout(() => {
+                    const footer = document.querySelector('.footer-actions');
         
         
         
-                        currentQuestionIndex++;
+                    const nextButton = document.createElement('button');
         
         
         
-                        if (currentQuestionIndex < currentQuestions.length) {
+                    nextButton.className = 'btn btn-primary';
         
         
         
-                            renderQuestion();
+                    nextButton.innerText = 'Next';
         
         
         
-                            document.getElementById('submit-btn').disabled = false;
+                    nextButton.onclick = () => showNextQuestion();
         
         
         
-                        } else {
+                    footer.appendChild(nextButton);
         
         
         
-                            showFinalScore();
+                }
         
         
         
-                        }
+            
         
         
         
-                    }, 2000);
+                function showNextQuestion() {
+        
+        
+        
+                    currentQuestionIndex++;
+        
+        
+        
+                    const footer = document.querySelector('.footer-actions');
+        
+        
+        
+                    footer.innerHTML = '<button id="submit-btn" class="btn btn-primary" onclick="submitQuiz()">Submit</button>';
+        
+        
+        
+                    if (currentQuestionIndex < currentQuestions.length) {
+        
+        
+        
+                        renderQuestion();
+        
+        
+        
+                    } else {
+        
+        
+        
+                        showFinalScore();
+        
+        
+        
+                    }
         
         
         
