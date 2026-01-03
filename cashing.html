@@ -135,288 +135,814 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         
-        .btn:hover { opacity: 0.9; }
-
-        .copy-btn {
-            background: #f1f5f9;
-            color: var(--secondary);
-            border: 1px solid #e2e8f0;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .copy-btn:hover {
-            background: #e2e8f0;
-            color: var(--text);
-            border-color: var(--secondary);
-        }
-
-        /* Results Styles */
-        .result-view { display: none; }
+        .btn-secondary { background: var(--secondary); color: white; }
         
-        .score-board {
-            text-align: center;
-            padding: 2rem;
-            background: #f1f5f9;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
-
-        .score-val {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        .feedback {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .feedback.correct { background: #dcfce7; color: #166534; border-left: 4px solid var(--success); }
-        .feedback.incorrect { background: #fee2e2; color: #991b1b; border-left: 4px solid var(--danger); }
-
-        .correct-answer-text {
-            font-weight: bold;
-            display: block;
-            margin-top: 5px;
-        }
-
-        .hidden { display: none; }
-
-        /* Toast Notification */
-        #toast {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: #1e293b;
-            color: #fff;
-            text-align: center;
-            border-radius: 8px;
-            padding: 14px;
-            position: fixed;
-            z-index: 1000;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            font-size: 0.95rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        #toast.show {
-            visibility: visible;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
-
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <header>
-        <h1>Cache Memory Master</h1>
-        <p class="meta">10 Random Questions | Computer Architecture & Organization</p>
-    </header>
-
-    <div id="quiz-view">
-        <div id="questions-container"></div>
-        <div class="footer-actions">
-            <button class="btn btn-primary" onclick="submitQuiz()">Submit Answers</button>
-        </div>
-    </div>
-
-    <div id="result-view" class="result-view">
-        <div class="score-board">
-            <div>Your Score</div>
-            <div class="score-val" id="final-score">0/10</div>
-            <div id="score-comment">Good effort!</div>
-        </div>
-        <div id="results-summary"></div>
-        <div class="footer-actions">
-            <button class="btn btn-success" onclick="initQuiz()">Try Another 10 Questions</button>
-        </div>
-    </div>
-</div>
-
-<div id="toast">Question and options copied!</div>
-
-<script src="questions/caching.js"></script>
-<script>
-    const allQuestions = cachingQuestions;
-    let currentQuestions = [];
-
-    function shuffle(array) {
-        return array.sort(() => Math.random() - 0.5);
-    }
-
-    function initQuiz() {
-        document.getElementById('quiz-view').style.display = 'block';
-        document.getElementById('result-view').style.display = 'none';
-        window.scrollTo(0,0);
         
-        currentQuestions = shuffle([...allQuestions]).slice(0, 10);
         
-        const container = document.getElementById('questions-container');
-        container.innerHTML = '';
-
-        currentQuestions.forEach((q, index) => {
-            const block = document.createElement('div');
-            block.className = 'question-block';
-            block.id = `block-${index}`;
-
-            let inputHTML = '';
-            if (q.type === "Numerical") {
-                inputHTML = `<input type="text" class="numerical-input" placeholder="Enter numerical value" data-idx="${index}">`;
-            } else if (q.type === "Multiple Choice") {
-                inputHTML = '<div class="options-grid">';
-                for (let key in q.options) {
-                    inputHTML += `
-                        <label class="option-label">
-                            <input type="radio" name="q-${index}" value="${key}" data-idx="${index}">
-                            ${key}: ${q.options[key]}
-                        </label>`;
+                /* Results Styles */
+        
+                .result-view { display: none; }
+        
+                
+        
+                .score-board {
+        
+                    text-align: center;
+        
+                    padding: 2rem;
+        
+                    background: #f1f5f9;
+        
+                    border-radius: 8px;
+        
+                    margin-bottom: 2rem;
+        
                 }
-                inputHTML += '</div>';
-            } else if (q.type === "Multiple Select") {
-                inputHTML = '<div class="options-grid">';
-                for (let key in q.options) {
-                    inputHTML += `
-                        <label class="option-label">
-                            <input type="checkbox" name="q-${index}" value="${key}" data-idx="${index}">
-                            ${key}: ${q.options[key]}
-                        </label>`;
+        
+        
+        
+                .score-val {
+        
+                    font-size: 3rem;
+        
+                    font-weight: 800;
+        
+                    color: var(--primary);
+        
                 }
-                inputHTML += '</div>';
-            }
-
-            block.innerHTML = `
-                <div class="question-header">
-                    <div class="header-left">
-                        <span class="meta">Question ${index + 1}</span>
-                        <span class="topic-badge">${q.topic}</span>
-                    </div>
+        
+        
+        
+                .feedback {
+        
+                    margin-top: 10px;
+        
+                    padding: 10px;
+        
+                    border-radius: 4px;
+        
+                    font-size: 0.9rem;
+        
+                }
+        
+        
+        
+                .feedback.correct { background: #dcfce7; color: #166534; border-left: 4px solid var(--success); }
+        
+                .feedback.incorrect { background: #fee2e2; color: #991b1b; border-left: 4px solid var(--danger); }
+        
+        
+        
+                .correct-answer-text {
+        
+                    font-weight: bold;
+        
+                    display: block;
+        
+                    margin-top: 5px;
+        
+                }
+        
+        
+        
+                .hidden { display: none; }
+        
+        
+        
+                /* Toast Notification */
+        
+                #toast {
+        
+                    visibility: hidden;
+        
+                    min-width: 250px;
+        
+                    background-color: #1e293b;
+        
+                    color: #fff;
+        
+                    text-align: center;
+        
+                    border-radius: 8px;
+        
+                    padding: 14px;
+        
+                    position: fixed;
+        
+                    z-index: 1000;
+        
+                    left: 50%;
+        
+                    bottom: 30px;
+        
+                    transform: translateX(-50%);
+        
+                    font-size: 0.95rem;
+        
+                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        
+                }
+        
+        
+        
+                #toast.show {
+        
+                    visibility: visible;
+        
+                    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        
+                }
+        
+        
+        
+                @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        
+                @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        
+            </style>
+        
+        </head>
+        
+        <body>
+        
+        
+        
+        <div class="container">
+        
+            <header>
+        
+                <h1>Cache Memory Master</h1>
+        
+                <p class="meta" id="quiz-meta"></p>
+        
+            </header>
+        
+        
+        
+            <div id="quiz-view">
+        
+                <div id="questions-container"></div>
+        
+                <div class="footer-actions">
+        
+                    <button id="submit-btn" class="btn btn-primary" onclick="submitQuiz()">Submit</button>
+        
                 </div>
-                <div class="question-text">${q.question}</div>
-                ${inputHTML}
-                <div id="feedback-${index}" class="feedback hidden"></div>
-            `;
-            container.appendChild(block);
-        });
-    }
-
-    function submitQuiz() {
-        let score = 0;
-        const summary = document.getElementById('results-summary');
-        summary.innerHTML = '';
-
-        currentQuestions.forEach((q, index) => {
-            let isCorrect = false;
-            let userAnswer = "";
-
-            if (q.type === "Numerical") {
-                const input = document.querySelector(`input[data-idx="${index}"]`);
-                userAnswer = input.value.trim().toLowerCase();
-                isCorrect = userAnswer === q.correct_answer.toLowerCase();
-            } else if (q.type === "Multiple Choice") {
-                const selected = document.querySelector(`input[name="q-${index}"]:checked`);
-                userAnswer = selected ? selected.value : "";
-                isCorrect = userAnswer === q.correct_answer;
-            } else if (q.type === "Multiple Select") {
-                const checked = Array.from(document.querySelectorAll(`input[name="q-${index}"]:checked`)).map(el => el.value);
-                userAnswer = checked;
-                isCorrect = checked.length === q.correct_answer.length && 
-                            checked.every(v => q.correct_answer.includes(v));
-            }
-
-            if (isCorrect) score++;
-
-            const resultBlock = document.getElementById(`block-${index}`).cloneNode(true);
-            const header = resultBlock.querySelector('.question-header');
-            
-            // Format Copy Text including Options
-            let textToCopy = q.question;
-            if (q.options && Object.keys(q.options).length > 0) {
-                textToCopy += "\n\nOptions:";
-                for (let key in q.options) {
-                    textToCopy += `\n${key}: ${q.options[key]}`;
-                }
-            }
-            textToCopy += `\n\nCorrect Answer: ${formatAnswer(q.correct_answer)}`;
-
-            const copyBtn = document.createElement('button');
-            copyBtn.className = 'copy-btn';
-            copyBtn.innerHTML = `
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                Copy Context
-            `;
-            copyBtn.onclick = () => copyToClipboard(textToCopy);
-            header.appendChild(copyBtn);
-
-            const feedback = resultBlock.querySelector('.feedback');
-            feedback.classList.remove('hidden');
-            
-            if (isCorrect) {
-                feedback.classList.add('correct');
-                feedback.innerHTML = `Correct! Your answer: ${formatAnswer(userAnswer)}`;
-            } else {
-                feedback.classList.add('incorrect');
-                feedback.innerHTML = `Incorrect. Your answer: ${formatAnswer(userAnswer)}
-                    <span class="correct-answer-text">Correct Answer: ${formatAnswer(q.correct_answer)}</span>`;
-            }
-            
-            summary.appendChild(resultBlock);
-        });
-
-        document.getElementById('final-score').innerText = `${score}/10`;
         
-        let comment = "Keep practicing!";
-        if (score === 10) comment = "Perfect! You are a master!";
-        else if (score >= 8) comment = "Excellent understanding!";
-        else if (score >= 5) comment = "Good effort, but room for improvement.";
-        document.getElementById('score-comment').innerText = comment;
-
-        document.getElementById('quiz-view').style.display = 'none';
-        document.getElementById('result-view').style.display = 'block';
-        window.scrollTo(0,0);
-    }
-
-    function formatAnswer(ans) {
-        if (Array.isArray(ans)) return ans.sort().join(", ") || "None";
-        return ans || "No answer";
-    }
-
-    function copyToClipboard(text) {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-            document.execCommand('copy');
-            showToast();
-        } catch (err) {
-            console.error('Unable to copy', err);
-        }
-        document.body.removeChild(textArea);
-    }
-
-    function showToast() {
-        const toast = document.getElementById("toast");
-        toast.className = "show";
-        setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
-    }
-
-    window.onload = initQuiz;
-</script>
-
-</body>
-</html>
+            </div>
+        
+        
+        
+            <div id="result-view" class="result-view">
+        
+                <div class="score-board">
+        
+                    <div>Your Score</div>
+        
+                    <div id="final-score">0/10</div>
+        
+                    <div id="score-comment">Good effort!</div>
+        
+                </div>
+        
+                <div id="results-summary"></div>
+        
+                <div class="footer-actions">
+        
+                    <button class="btn btn-success" onclick="initQuiz()">Try Another Set of Questions</button>
+        
+                </div>
+        
+            </div>
+        
+        </div>
+        
+        
+        
+        <div id="toast">Question and options copied!</div>
+        
+        
+        
+        <script src="questions/caching.js"></script>
+        
+        <script>
+        
+            const allQuestions = cachingQuestions;
+        
+            let currentQuestions = [];
+        
+            let oneQuestionMode = false;
+        
+            let currentQuestionIndex = 0;
+        
+            let score = 0;
+        
+        
+        
+            function shuffle(array) {
+        
+                return array.sort(() => Math.random() - 0.5);
+        
+            }
+        
+        
+        
+            function initQuiz() {
+        
+                oneQuestionMode = localStorage.getItem('oneQuestionMode') === 'true';
+        
+                currentQuestionIndex = 0;
+        
+                score = 0;
+        
+        
+        
+                document.getElementById('quiz-view').style.display = 'block';
+        
+                document.getElementById('result-view').style.display = 'none';
+        
+                document.getElementById('submit-btn').innerText = oneQuestionMode ? 'Submit' : 'Submit Answers';
+        
+                window.scrollTo(0,0);
+        
+                
+        
+                currentQuestions = shuffle([...allQuestions]).slice(0, 10);
+        
+                document.getElementById('quiz-meta').innerText = `${oneQuestionMode ? '1 Question at a time' : '10 Random Questions'} | Computer Architecture & Organization`;
+        
+                
+        
+                renderQuestion();
+        
+            }
+        
+        
+        
+            function renderQuestion() {
+        
+                const container = document.getElementById('questions-container');
+        
+                container.innerHTML = '';
+        
+                const q = currentQuestions[currentQuestionIndex];
+        
+                const index = currentQuestionIndex;
+        
+        
+        
+                const block = document.createElement('div');
+        
+                block.className = 'question-block';
+        
+                block.id = `block-${index}`;
+        
+        
+        
+                let inputHTML = '';
+        
+                if (q.type === "Numerical") {
+        
+                    inputHTML = `<input type="text" class="numerical-input" placeholder="Enter numerical value" data-idx="${index}">`;
+        
+                } else if (q.type === "Multiple Choice") {
+        
+                    inputHTML = '<div class="options-grid">';
+        
+                    for (let key in q.options) {
+        
+                        inputHTML += `
+        
+                            <label class="option-label">
+        
+                                <input type="radio" name="q-${index}" value="${key}" data-idx="${index}">
+        
+                                ${key}: ${q.options[key]}
+        
+                            </label>`;
+        
+                    }
+        
+                    inputHTML += '</div>';
+        
+                } else if (q.type === "Multiple Select") {
+        
+                    inputHTML = '<div class="options-grid">';
+        
+                    for (let key in q.options) {
+        
+                        inputHTML += `
+        
+                            <label class="option-label">
+        
+                                <input type="checkbox" name="q-${index}" value="${key}" data-idx="${index}">
+        
+                                ${key}: ${q.options[key]}
+        
+                            </label>`;
+        
+                    }
+        
+                    inputHTML += '</div>';
+        
+                }
+        
+        
+        
+                block.innerHTML = `
+        
+                    <div class="question-header">
+        
+                        <div class="header-left">
+        
+                            <span class="meta">Question ${index + 1}</span>
+        
+                            <span class="topic-badge">${q.topic}</span>
+        
+                        </div>
+        
+                    </div>
+        
+                    <div class="question-text">${q.question}</div>
+        
+                    ${inputHTML}
+        
+                    <div id="feedback-${index}" class="feedback hidden"></div>
+        
+                `;
+        
+                container.appendChild(block);
+        
+            }
+        
+            
+        
+            function submitQuiz() {
+        
+                if (oneQuestionMode) {
+        
+                    checkAnswerAndProceed();
+        
+                } else {
+        
+                    showFullResults();
+        
+                }
+        
+            }
+        
+        
+        
+            function checkAnswerAndProceed() {
+        
+        
+        
+                    const q = currentQuestions[currentQuestionIndex];
+        
+        
+        
+                    const index = currentQuestionIndex;
+        
+        
+        
+                    let isCorrect = false;
+        
+        
+        
+            
+        
+        
+        
+                    let userAnswer = "";
+        
+        
+        
+                    if (q.type === "Numerical") {
+        
+        
+        
+                        const input = document.querySelector(`input[data-idx="${index}"]`);
+        
+        
+        
+                        userAnswer = input ? input.value.trim().toLowerCase() : "";
+        
+        
+        
+                        isCorrect = userAnswer === q.correct_answer.toLowerCase();
+        
+        
+        
+                    } else if (q.type === "Multiple Choice") {
+        
+        
+        
+                        const selected = document.querySelector(`input[name="q-${index}"]:checked`);
+        
+        
+        
+                        userAnswer = selected ? selected.value : "";
+        
+        
+        
+                        isCorrect = userAnswer === q.correct_answer;
+        
+        
+        
+                    } else if (q.type === "Multiple Select") {
+        
+        
+        
+                        const checked = Array.from(document.querySelectorAll(`input[name="q-${index}"]:checked`)).map(el => el.value);
+        
+        
+        
+                        userAnswer = checked;
+        
+        
+        
+                        isCorrect = checked.length === q.correct_answer.length && 
+        
+        
+        
+                                    checked.every(v => q.correct_answer.includes(v));
+        
+        
+        
+                    }
+        
+        
+        
+            
+        
+        
+        
+                    if (isCorrect) {
+        
+        
+        
+                        score++;
+        
+        
+        
+                    }
+        
+        
+        
+            
+        
+        
+        
+                    const feedback = document.getElementById(`feedback-${index}`);
+        
+        
+        
+                    feedback.classList.remove('hidden');
+        
+        
+        
+                    feedback.classList.add(isCorrect ? 'correct' : 'incorrect');
+        
+        
+        
+                    feedback.innerHTML = isCorrect ? 'Correct!' : `Incorrect. Correct Answer: ${formatAnswer(q.correct_answer)}`;
+        
+        
+        
+                    
+        
+        
+        
+                    const header = document.querySelector(`#block-${index} .question-header`);
+        
+        
+        
+                    let textToCopy = q.question;
+        
+        
+        
+                    if (q.options && Object.keys(q.options).length > 0) {
+        
+        
+        
+                        textToCopy += "\n\nOptions:";
+        
+        
+        
+                        for (let key in q.options) {
+        
+        
+        
+                            textToCopy += `\n${key}: ${q.options[key]}`;
+        
+        
+        
+                        }
+        
+        
+        
+                    }
+        
+        
+        
+                    textToCopy += `\n\nCorrect Answer: ${formatAnswer(q.correct_answer)}`;
+        
+        
+        
+            
+        
+        
+        
+                    const copyBtn = document.createElement('button');
+        
+        
+        
+                    copyBtn.className = 'copy-btn';
+        
+        
+        
+                    copyBtn.innerHTML = `
+        
+        
+        
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        
+        
+        
+                        Copy Context
+        
+        
+        
+                    `;
+        
+        
+        
+                    copyBtn.onclick = () => copyToClipboard(textToCopy);
+        
+        
+        
+                    header.appendChild(copyBtn);
+        
+        
+        
+            
+        
+        
+        
+                    document.getElementById('submit-btn').disabled = true;
+        
+        
+        
+            
+        
+        
+        
+                    setTimeout(() => {
+        
+        
+        
+                        currentQuestionIndex++;
+        
+        
+        
+                        if (currentQuestionIndex < currentQuestions.length) {
+        
+        
+        
+                            renderQuestion();
+        
+        
+        
+                            document.getElementById('submit-btn').disabled = false;
+        
+        
+        
+                        } else {
+        
+        
+        
+                            showFinalScore();
+        
+        
+        
+                        }
+        
+        
+        
+                    }, 2000);
+        
+        
+        
+                }
+        
+        
+        
+            function showFullResults() {
+        
+                const summary = document.getElementById('results-summary');
+        
+                summary.innerHTML = '';
+        
+                let currentScore = 0;
+        
+        
+        
+                currentQuestions.forEach((q, index) => {
+        
+                    let isCorrect = false;
+        
+                    let userAnswer = "";
+        
+        
+        
+                    if (q.type === "Numerical") {
+        
+                        const input = document.querySelector(`input[data-idx="${index}"]`);
+        
+                        userAnswer = input ? input.value.trim().toLowerCase() : "";
+        
+                        isCorrect = userAnswer === q.correct_answer.toLowerCase();
+        
+                    } else if (q.type === "Multiple Choice") {
+        
+                        const selected = document.querySelector(`input[name="q-${index}"]:checked`);
+        
+                        userAnswer = selected ? selected.value : "";
+        
+                        isCorrect = userAnswer === q.correct_answer;
+        
+                    } else if (q.type === "Multiple Select") {
+        
+                        const checked = Array.from(document.querySelectorAll(`input[name="q-${index}"]:checked`)).map(el => el.value);
+        
+                        userAnswer = checked;
+        
+                        isCorrect = checked.length === q.correct_answer.length && 
+        
+                                    checked.every(v => q.correct_answer.includes(v));
+        
+                    }
+        
+        
+        
+                    if (isCorrect) currentScore++;
+        
+        
+        
+                    const resultBlock = document.createElement('div');
+        
+                    resultBlock.className = 'question-block';
+        
+                    
+        
+                    let inputHTML = '';
+        
+                     if (q.type === "Multiple Choice" || q.type === "Multiple Select") {
+        
+                        inputHTML = '<div class="options-grid">';
+        
+                        for (let key in q.options) {
+        
+                            inputHTML += `<div>${key}: ${q.options[key]}</div>`;
+        
+                        }
+        
+                        inputHTML += '</div>';
+        
+                    }
+        
+        
+        
+                    resultBlock.innerHTML = `
+        
+                        <div class="question-header">
+        
+                            <div class="header-left">
+        
+                                <span class="meta">Question ${index + 1}</span>
+        
+                                <span class="topic-badge">${q.topic}</span>
+        
+                            </div>
+        
+                        </div>
+        
+                        <div class="question-text">${q.question}</div>
+        
+                        ${inputHTML}
+        
+                        <div class="feedback ${isCorrect ? 'correct' : 'incorrect'}">
+        
+                            Your answer: ${formatAnswer(userAnswer)}
+        
+                            ${!isCorrect ? `<span class="correct-answer-text">Correct Answer: ${formatAnswer(q.correct_answer)}</span>` : ''}
+        
+                        </div>
+        
+                    `;
+        
+                    summary.appendChild(resultBlock);
+        
+                });
+        
+                
+        
+                score = currentScore;
+        
+                showFinalScore();
+        
+            }
+        
+            
+        
+            function showFinalScore() {
+        
+                document.getElementById('final-score').innerText = `${score}/${currentQuestions.length}`;
+        
+                
+        
+                let comment = "Keep practicing!";
+        
+                if (score === currentQuestions.length) comment = "Perfect! You are a master!";
+        
+                else if (score >= currentQuestions.length * 0.8) comment = "Excellent understanding!";
+        
+                else if (score >= currentQuestions.length * 0.5) comment = "Good effort, but room for improvement.";
+        
+                document.getElementById('score-comment').innerText = comment;
+        
+        
+        
+                document.getElementById('quiz-view').style.display = 'none';
+        
+                document.getElementById('result-view').style.display = 'block';
+        
+                window.scrollTo(0,0);
+        
+            }
+        
+        
+        
+            function formatAnswer(ans) {
+        
+                if (Array.isArray(ans)) return ans.sort().join(", ") || "None";
+        
+                return ans || "No answer";
+        
+            }
+        
+        
+        
+            function copyToClipboard(text) {
+        
+                const textArea = document.createElement("textarea");
+        
+                textArea.value = text;
+        
+                document.body.appendChild(textArea);
+        
+                textArea.select();
+        
+                try {
+        
+                    document.execCommand('copy');
+        
+                    showToast();
+        
+                } catch (err) {
+        
+                    console.error('Unable to copy', err);
+        
+                }
+        
+                document.body.removeChild(textArea);
+        
+            }
+        
+        
+        
+            function showToast() {
+        
+                const toast = document.getElementById("toast");
+        
+                toast.className = "show";
+        
+                setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        
+            }
+        
+        
+        
+            window.onload = initQuiz;
+        
+        </script>
+        
+        
+        
+        </body>
+        
+        </html>
+        
+        
+        
+        
