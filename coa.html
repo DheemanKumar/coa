@@ -137,6 +137,26 @@
         
         .btn-secondary { background: var(--secondary); color: white; }
         
+        .copy-btn {
+            background: #f1f5f9;
+            color: var(--secondary);
+            border: 1px solid #e2e8f0;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #e2e8f0;
+            color: var(--text);
+            border-color: var(--secondary);
+        }
         
         
                 /* Results Styles */
@@ -1112,6 +1132,37 @@
                     `;
         
                     summary.appendChild(resultBlock);
+        
+                    const header = resultBlock.querySelector('.question-header');
+        
+                    let textToCopy = q.question;
+        
+                    if (q.options && Object.keys(q.options).length > 0) {
+        
+                        textToCopy += "\n\nOptions:";
+        
+                        for (let key in q.options) {
+        
+                            textToCopy += `\n${key}: ${q.options[key]}`;
+        
+                        }
+        
+                    }
+        
+                    textToCopy += `\n\nCorrect Answer: ${formatAnswer(q.correct_answer)}`;
+        
+                    const copyBtn = document.createElement('button');
+        
+                    copyBtn.className = 'copy-btn';
+        
+                    copyBtn.innerHTML = `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy Context
+                    `;
+        
+                    copyBtn.onclick = () => copyToClipboard(textToCopy);
+        
+                    header.appendChild(copyBtn);
         
                 });
         
